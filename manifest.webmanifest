@@ -1,0 +1,32 @@
+{
+  "name": "NEON DUEL",
+  "short_name": "NEON DUEL",
+  "description": "ルームコードを共有して遊ぶ、オンライン2人対戦ピンポン。",
+  "lang": "ja",
+  "start_url": "./duel.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#060913",
+  "theme_color": "#060913",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
