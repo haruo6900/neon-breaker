@@ -726,7 +726,7 @@
   <p class="hint">
     <span class="p1hint" id="hint-p1"><b>P1</b> <kbd>W</kbd><kbd>S</kbd></span>
     <span class="p2hint" id="hint-p2"><b>P2</b> <kbd>↑</kbd><kbd>↓</kbd></span>
-    <span id="hint-touch">タッチ: 左右をドラッグ</span>
+    <span id="hint-touch">タッチ: 上下にドラッグ</span>
     <span class="keyhint"><kbd>P</kbd> 一時停止</span>
     <span class="keyhint"><kbd>R</kbd> リスタート</span>
     <span class="keyhint"><kbd>M</kbd> サウンド</span>
@@ -1002,7 +1002,7 @@
       el.hintP2.style.display = '';
       el.hintP2.className = 'p2hint';
       el.hintP2.innerHTML = touch ? '<b>P2</b> 右側' : '<b>P2</b> <kbd>↑</kbd><kbd>↓</kbd>';
-      el.hintTouch.textContent = touch ? 'タッチ: 左右をドラッグ / 横向き推奨' : 'タッチ: 左右をドラッグ';
+      el.hintTouch.textContent = touch ? 'タッチ: 上下にドラッグ / 横向き推奨' : 'タッチ: 上下にドラッグ';
     } else {
       el.hintP1.style.display = '';
       el.hintP1.className = mode === 'guest' ? 'p2hint' : 'p1hint';
@@ -1010,7 +1010,7 @@
         ? '<b>YOU</b> 画面をドラッグ'
         : '<b>YOU</b> <kbd>W</kbd><kbd>S</kbd> / <kbd>↑</kbd><kbd>↓</kbd>';
       el.hintP2.style.display = 'none';
-      el.hintTouch.textContent = touch ? 'タッチ: 画面をドラッグ / 横向き推奨' : 'タッチ: 画面をドラッグ';
+      el.hintTouch.textContent = touch ? 'タッチ: 画面を上下にドラッグ / 横向き推奨' : 'タッチ: 画面を上下にドラッグ';
     }
   }
 
