@@ -5,6 +5,11 @@
 - `index.html` … 1人用ブロック崩し **NEON BREAKER**
 - `duel.html` … 2人対戦ピンポン **NEON DUEL**（1台対戦 / 別端末オンライン対戦）
 
+## 公開URL
+
+- NEON BREAKER（1人用）: https://haruo6900.github.io/neon-breaker/
+- NEON DUEL（2人対戦）: https://haruo6900.github.io/neon-breaker/duel.html
+
 ## NEON DUEL の遊び方
 
 ### 別端末でオンライン対戦
@@ -72,8 +77,6 @@ npx serve .
 LAN配信の場合は、PCのファイアウォールでポートを許可してください。オンライン対戦ではCDNとMQTTブローカーへの接続が必要です。iPhoneで安定して遊ぶにはHTTPSホスティングを推奨します。
 
 ## NEON BREAKER（1人用）
-
-公開URL: https://haruo6900.github.io/neon-breaker/
 
 - パドル操作: マウス / タッチ / `←` `→` `A` `D`
 - 発射: クリック / タップ / `Space`
