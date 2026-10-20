@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>NEON BREAKER — ブラウザで遊べるブロック崩し</title>
+<style>
+  * { box-sizing: border-box; }
+
+  :root { --ar: 1.3333; }
+
+  html, body { height: 100%; }
+
+  body {
+    margin: 0;
+    min-height: 100svh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding:
+      max(14px, env(safe-area-inset-top))
+      max(14px, env(safe-area-inset-right))
+      max(14px, env(safe-area-inset-bottom))
+      max(14px, env(safe-area-inset-left));
+    overscroll-behavior: none;
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    background: #070a15;
+    background-image:
+      radial-gradient(900px 520px at 50% -12%, rgba(123, 97, 255, 0.28), transparent 70%),
+      radial-gradient(760px 460px at 105% 108%, rgba(78, 205, 196, 0.14), transparent 72%),
+      radial-gradient(620px 400px at -8% 96%, rgba(255, 77, 109, 0.10), transparent 70%);
+    color: #e8ecff;
+    font-family: ui-sans-serif, system-ui, "Segoe UI", "Hiragino Sans", "Noto Sans JP", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  .wrap {
+    width: min(880px, 100%, calc((100svh - 92px) * var(--ar)));
+    margin: 0 auto;
+  }
+
+  /* ---------- ヘッダー ---------- */
+  header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-bottom: 12px;
+    padding: 0 4px;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(15px, 2.6vw, 20px);
+    font-weight: 900;
+    letter-spacing: 0.2em;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+
+  h1 span {
+    background: linear-gradient(90deg, #7b61ff, #4ecdc4);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .hud {
+    display: flex;
+    align-items: center;
+    gap: clamp(12px, 3vw, 26px);
+  }
+
+  .stat { display: flex; flex-direction: column; gap: 3px; }
+
+  .stat .label {
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    color: #6f7aa5;
+    font-weight: 700;
+  }
+
+  .stat .val {
+    font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+    font-size: clamp(14px, 2.2vw, 18px);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+  }
+
+  #lives { color: #ff4d6d; letter-spacing: 0.1em; }
+
+  .icon-btn {
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    border-radius: 10px;
+    border: 1px solid rgba(150, 170, 255, 0.16);
+    background: rgba(150, 170, 255, 0.06);
+    color: #aab3d6;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+  }
+
+  .icon-btn:hover { background: rgba(150, 170, 255, 0.13); color: #fff; }
+
+  /* ---------- ゲーム画面 ---------- */
+  .stage {
+    position: relative;
+    border-radius: 20px;
+    overflow: hidden;
+    background: #0a0f21;
+    box-shadow:
+      0 34px 90px -24px rgba(0, 0, 0, 0.95),
+      0 0 0 1px rgba(120, 150, 255, 0.18),
+      0 0 70px -30px rgba(123, 97, 255, 0.75);
+  }
+
+  canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 3;
+    touch-action: none;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    canvas { cursor: none; }
+  }
+
+  .overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 24px;
+    text-align: center;
+    background: rgba(6, 9, 20, 0.74);
+    -webkit-backdrop-filter: blur(7px);
+    backdrop-filter: blur(7px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+
+  .overlay.show { opacity: 1; pointer-events: auto; }
+
+  .overlay h2 {
+    margin: 0;
+    font-size: clamp(26px, 5.4vw, 46px);
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    background: linear-gradient(90deg, #7b61ff, #4ecdc4 55%, #ffe66d);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 0 20px rgba(123, 97, 255, 0.5));
+  }
+
+  .overlay p {
+    margin: 0;
+    max-width: 26em;
+    color: #aab3d6;
+    font-size: clamp(12px, 1.9vw, 15px);
+    line-height: 1.85;
+  }
+
+  .overlay p b { color: #fff; font-weight: 800; }
+
+  .overlay .best { font-size: 12px; color: #6f7aa5; letter-spacing: 0.08em; }
+
+  #ov-btn {
+    margin-top: 8px;
+    padding: 13px 40px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 999px;
+    background: linear-gradient(135deg, #7b61ff, #4ecdc4);
+    color: #080b16;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    box-shadow: 0 12px 34px -10px rgba(123, 97, 255, 0.9);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  #ov-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 18px 40px -12px rgba(123, 97, 255, 1);
+  }
+
+  #ov-btn:active { transform: translateY(0); }
+
+  /* ---------- フッター ---------- */
+  .hint {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 8px 18px;
+    margin-top: 14px;
+    color: #66719a;
+    font-size: 11.5px;
+  }
+
+  kbd {
+    display: inline-block;
+    padding: 1px 6px;
+    margin: 0 1px;
+    border-radius: 5px;
+    border: 1px solid rgba(150, 170, 255, 0.22);
+    border-bottom-width: 2px;
+    background: rgba(150, 170, 255, 0.08);
+    color: #b9c3e6;
+    font-family: ui-monospace, Consolas, monospace;
+    font-size: 10.5px;
+  }
+
+  @media (max-width: 700px) {
+    header { gap: 10px; }
+    h1 { letter-spacing: 0.12em; }
+    .hud { gap: 12px; }
+    .stat .label { font-size: 8px; letter-spacing: 0.16em; }
+    .stat.best { display: none; }
+    .stage, .overlay { border-radius: 14px; }
+  }
+
+  @media (max-height: 520px) and (orientation: landscape) {
+    header { margin-bottom: 8px; }
+    h1 { font-size: 13px; }
+    .stat .val { font-size: 14px; }
+    .stat .label { font-size: 8px; }
+  }
+
+  @media (hover: none) {
+    .hint { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>NEON <span>BREAKER</span></h1>
+    <div class="hud">
+      <div class="stat"><span class="label">SCORE</span><span class="val" id="score">0</span></div>
+      <div class="stat best"><span class="label">BEST</span><span class="val" id="best">0</span></div>
+      <div class="stat"><span class="label">LEVEL</span><span class="val" id="level">1</span></div>
+      <div class="stat"><span class="label">LIVES</span><span class="val" id="lives">♥♥♥</span></div>
+      <button class="icon-btn" id="sound" type="button" aria-label="サウンドの切り替え" title="サウンド (M)">🔊</button>
+    </div>
+  </header>
+
+  <div class="stage">
+    <canvas id="game" width="800" height="600" aria-label="ブロック崩しゲーム画面"></canvas>
+    <div class="overlay" id="overlay">
+      <h2 id="ov-title">NEON BREAKER</h2>
+      <p id="ov-msg"></p>
+      <button id="ov-btn" type="button">スタート</button>
+      <span class="best" id="ov-best"></span>
+    </div>
+  </div>
+
+  <p class="hint">
+    <span><kbd>←</kbd><kbd>→</kbd> / マウス / タッチでパドル操作</span>
+    <span><kbd>Space</kbd> 発射</span>
+    <span><kbd>P</kbd> 一時停止</span>
+    <span><kbd>R</kbd> リスタート</span>
+    <span><kbd>M</kbd> サウンド</span>
+  </p>
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  // ============================================================
+  //  基本設定（画面の向きで縦横を切り替え）
+  // ============================================================
+  let W = 800;
+  let H = 600;
+  const DPR = Math.min(window.devicePixelRatio || 1, 2);
+
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+
+  const el = {
+    score: document.getElementById('score'),
+    best: document.getElementById('best'),
+    level: document.getElementById('level'),
+    lives: document.getElementById('lives'),
+    overlay: document.getElementById('overlay'),
+    ovTitle: document.getElementById('ov-title'),
+    ovMsg: document.getElementById('ov-msg'),
+    ovBtn: document.getElementById('ov-btn'),
+    ovBest: document.getElementById('ov-best'),
+    sound: document.getElementById('sound')
+  };
+
+  const COLORS = ['#7b61ff', '#4ecdc4', '#ffe66d', '#ff9f1c', '#ff4d6d'];
+
+  const COLS = 9;
+  const ROWS = 5;
+  let MARGIN = 42;
+  let GAP = 8;
+  let TOP = 69;
+  let BH = 24;
+  let BW = 71;
+
+  const clamp = (v, lo, hi) => v < lo ? lo : v > hi ? hi : v;
+
+  // ============================================================
+  //  状態
+  // ============================================================
+  // start / ready / playing / paused / clear / over
+  let state = 'start';
+
+  let score = 0;
+  let level = 1;
+  let lives = 3;
+  let best = Number(localStorage.getItem('neon-breaker-best') || 0) || 0;
+
+  let bricks = [];
+  let particles = [];
+  let trail = [];
+  let shake = 0;
+  let soundOn = true;
+  let last = performance.now();
+
+  const paddle = { x: 0, y: 0, w: 112, h: 14, target: 0 };
+  const ball = { x: 0, y: 0, vx: 0, vy: 0, r: 8 };
+
+  let keyLeft = false;
+  let keyRight = false;
+  let overlayAction = null;
+
+  // ============================================================
+  //  サウンド (WebAudio)
+  // ============================================================
+  let actx = null;
+
+  function audio() {
+    if (!actx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
+      actx = new AC();
+    }
+    if (actx.state === 'suspended') actx.resume();
+    return actx;
+  }
+
+  function beep(freq, dur, type = 'sine', vol = 0.05) {
+    if (!soundOn) return;
+    const a = audio();
+    if (!a) return;
+    try {
+      const osc = a.createOscillator();
+      const gain = a.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, a.currentTime);
+      gain.gain.setValueAtTime(vol, a.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, a.currentTime + dur);
+      osc.connect(gain);
+      gain.connect(a.destination);
+      osc.start();
+      osc.stop(a.currentTime + dur);
+    } catch (e) { /* 無視 */ }
+  }
+
+  // ============================================================
+  //  HUD
+  // ============================================================
+  function syncHUD() {
+    el.score.textContent = score.toLocaleString('ja-JP');
+    el.best.textContent = best.toLocaleString('ja-JP');
+    el.level.textContent = level;
+    el.lives.textContent = lives > 0 ? '♥'.repeat(lives) : '—';
+  }
+
+  // ============================================================
+  //  オーバーレイ
+  // ============================================================
+  function showOverlay(title, msg, btn, action) {
+    el.ovTitle.textContent = title;
+    el.ovMsg.innerHTML = msg;
+    el.ovBtn.textContent = btn;
+    el.ovBest.textContent = best > 0 ? 'BEST ' + best.toLocaleString('ja-JP') : '';
+    overlayAction = action;
+    el.overlay.classList.add('show');
+  }
+
+  function hideOverlay() {
+    el.overlay.classList.remove('show');
+    overlayAction = null;
+  }
+
+  el.ovBtn.addEventListener('click', () => {
+    const fn = overlayAction;
+    el.ovBtn.blur();
+    audio();
+    if (fn) fn();
+  });
+
+  // ============================================================
+  //  レイアウト（縦向き / 横向き）
+  // ============================================================
+  let worldReady = false;
+
+  function applyLayout(preserve) {
+    const portrait = window.innerHeight > window.innerWidth;
+    const nw = portrait ? 600 : 800;
+    const nh = portrait ? 800 : 600;
+    if (nw === W && nh === H && worldReady) return;
+
+    const sx = nw / W;
+    const sy = nh / H;
+    const alive = bricks.map(b => b.alive);
+    const relPaddle = paddle.x / W;
+    const relBallX = ball.x / W;
+    const relBallY = ball.y / H;
+
+    W = nw;
+    H = nh;
+
+    canvas.width = W * DPR;
+    canvas.height = H * DPR;
+    canvas.style.aspectRatio = W + ' / ' + H;
+    document.documentElement.style.setProperty('--ar', (W / H).toFixed(4));
+
+    MARGIN = Math.round(W * 0.052);
+    GAP = 8;
+    TOP = Math.round(H * 0.115);
+    BH = 24;
+    BW = (W - MARGIN * 2 - GAP * (COLS - 1)) / COLS;
+
+    paddle.w = 112;
+    paddle.h = 14;
+    paddle.y = H - 52;
+    ball.r = 8;
+    paddle.x = clamp(relPaddle * W, paddle.w / 2, W - paddle.w / 2);
+    paddle.target = paddle.x;
+
+    buildGradients();
+
+    const keep = preserve && bricks.length === COLS * ROWS;
+    bricks = buildBricks(keep ? alive : null);
+
+    if (keep) {
+      ball.x = clamp(relBallX * W, ball.r, W - ball.r);
+      ball.y = clamp(relBallY * H, ball.r, H - ball.r);
+      ball.vx *= sx;
+      ball.vy *= sy;
+    } else {
+      paddle.x = W / 2;
+      paddle.target = W / 2;
+      ball.x = W / 2;
+      ball.y = paddle.y - ball.r - 4;
+      ball.vx = 0;
+      ball.vy = 0;
+    }
+
+    if (state === 'ready') {
+      paddle.x = W / 2;
+      paddle.target = W / 2;
+      ball.x = paddle.x;
+      ball.y = paddle.y - ball.r - 4;
+      ball.vx = 0;
+      ball.vy = 0;
+    }
+
+    trail.length = 0;
+    particles.length = 0;
+    shake = 0;
+    worldReady = true;
+  }
+
+  function buildBricks(alive) {
+    const list = [];
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+        const i = r * COLS + c;
+        list.push({
+          x: MARGIN + c * (BW + GAP),
+          y: TOP + r * (BH + GAP),
+          w: BW,
+          h: BH,
+          color: COLORS[r % COLORS.length],
+          alive: alive ? alive[i] !== false : true
+        });
+      }
+    }
+    return list;
+  }
+
+  function resetBall() {
+    paddle.target = W / 2;
+    paddle.x = W / 2;
+    ball.x = paddle.x;
+    ball.y = paddle.y - ball.r - 4;
+    ball.vx = 0;
+    ball.vy = 0;
+    trail.length = 0;
+    state = 'ready';
+  }
+
+  function startGame() {
+    score = 0;
+    level = 1;
+    lives = 3;
+    particles.length = 0;
+    shake = 0;
+    bricks = buildBricks();
+    resetBall();
+    hideOverlay();
+    syncHUD();
+    last = performance.now();
+    beep(660, 0.08, 'triangle', 0.05);
+  }
+
+  function nextLevel() {
+    level++;
+    particles.length = 0;
+    bricks = buildBricks();
+    resetBall();
+    hideOverlay();
+    syncHUD();
+    last = performance.now();
+  }
+
+  function launch() {
+    if (state !== 'ready') return;
+    const speed = 340 + (level - 1) * 38;
+    const angle = (Math.random() - 0.5) * 0.7; // 上下方向から ±20°
+    ball.vx = Math.sin(angle) * speed;
+    ball.vy = -Math.cos(angle) * speed;
+    state = 'playing';
+    beep(560, 0.08, 'square', 0.04);
+  }
+
+  function loseLife() {
+    lives--;
+    shake = 16;
+    beep(170, 0.28, 'sawtooth', 0.05);
+    syncHUD();
+    if (lives <= 0) {
+      gameOver();
+    } else {
+      resetBall();
+    }
+  }
+
+  function gameOver() {
+    state = 'over';
+    if (score > best) {
+      best = score;
+      localStorage.setItem('neon-breaker-best', best);
+    }
+    syncHUD();
+    beep(220, 0.18, 'sawtooth', 0.05);
+    setTimeout(() => beep(150, 0.4, 'sawtooth', 0.05), 150);
+    showOverlay(
+      'GAME OVER',
+      'スコア <b>' + score.toLocaleString('ja-JP') + '</b><br>ブロックを全部壊してハイスコアを目指そう。',
+      'もう一度',
+      startGame
+    );
+  }
+
+  function levelClear() {
+    score += 100 * level;
+    state = 'clear';
+    shake = 8;
+    if (score > best) {
+      best = score;
+      localStorage.setItem('neon-breaker-best', best);
+    }
+    syncHUD();
+    beep(700, 0.1, 'triangle', 0.05);
+    setTimeout(() => beep(880, 0.12, 'triangle', 0.05), 100);
+    setTimeout(() => beep(1100, 0.18, 'triangle', 0.05), 210);
+    showOverlay(
+      'LEVEL ' + level + ' CLEAR',
+      'ボーナス <b>+' + (100 * level).toLocaleString('ja-JP') + '</b>　／　次のレベルは少し速くなります。',
+      '次へ',
+      nextLevel
+    );
+  }
+
+  function togglePause() {
+    if (state === 'playing') {
+      state = 'paused';
+      showOverlay('PAUSED', '一時停止中です。', '再開', resumeGame);
+    } else if (state === 'paused') {
+      resumeGame();
+    }
+  }
+
+  function resumeGame() {
+    hideOverlay();
+    state = 'playing';
+    last = performance.now();
+  }
+
+  function toggleSound() {
+    soundOn = !soundOn;
+    el.sound.textContent = soundOn ? '🔊' : '🔇';
+    el.sound.setAttribute('aria-label', soundOn ? 'サウンドをオフにする' : 'サウンドをオンにする');
+    if (soundOn) beep(720, 0.07, 'triangle', 0.04);
+  }
+
+  // ============================================================
+  //  更新
+  // ============================================================
+  function update(dt) {
+    // パドル
+    if (keyLeft) paddle.target -= 720 * dt;
+    if (keyRight) paddle.target += 720 * dt;
+    paddle.target = clamp(paddle.target, paddle.w / 2, W - paddle.w / 2);
+    paddle.x += (paddle.target - paddle.x) * Math.min(1, dt * 22);
+    paddle.x = clamp(paddle.x, paddle.w / 2, W - paddle.w / 2);
+
+    if (state === 'ready') {
+      ball.x = paddle.x;
+      ball.y = paddle.y - ball.r - 4;
+      trail.length = 0;
+    } else if (state === 'playing') {
+      trail.unshift({ x: ball.x, y: ball.y });
+      if (trail.length > 14) trail.pop();
+      updateBall(dt);
+    }
+
+    // パーティクル
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+      p.life += dt;
+      if (p.life >= p.max) {
+        particles.splice(i, 1);
+        continue;
+      }
+      p.vy += 700 * dt;
+      p.vx *= 0.99;
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
+    }
+
+    shake = Math.max(0, shake - dt * 50);
+  }
+
+  function updateBall(dt) {
+    const speed = Math.hypot(ball.vx, ball.vy) || 1;
+    // 高速時のすり抜けを防ぐため、移動を細かく分割
+    const steps = Math.max(1, Math.ceil((speed * dt) / (ball.r * 0.85)));
+    const sdt = dt / steps;
+
+    for (let i = 0; i < steps; i++) {
+      ball.x += ball.vx * sdt;
+      ball.y += ball.vy * sdt;
+
+      // 壁
+      if (ball.x - ball.r < 0) {
+        ball.x = ball.r;
+        ball.vx = Math.abs(ball.vx);
+        beep(300, 0.04, 'sine', 0.025);
+      } else if (ball.x + ball.r > W) {
+        ball.x = W - ball.r;
+        ball.vx = -Math.abs(ball.vx);
+        beep(300, 0.04, 'sine', 0.025);
+      }
+      if (ball.y - ball.r < 0) {
+        ball.y = ball.r;
+        ball.vy = Math.abs(ball.vy);
+        beep(300, 0.04, 'sine', 0.025);
+      }
+
+      // パドル
+      if (
+        ball.vy > 0 &&
+        ball.y + ball.r >= paddle.y &&
+        ball.y - ball.r <= paddle.y + paddle.h &&
+        ball.x >= paddle.x - paddle.w / 2 - ball.r &&
+        ball.x <= paddle.x + paddle.w / 2 + ball.r
+      ) {
+        ball.y = paddle.y - ball.r;
+        const hit = clamp((ball.x - paddle.x) / (paddle.w / 2), -1, 1);
+        const sp = Math.min(speed * 1.015, 760);
+        const ang = hit * (Math.PI / 3); // 最大 ±60°
+        ball.vx = Math.sin(ang) * sp;
+        ball.vy = -Math.cos(ang) * sp;
+        burst(ball.x, paddle.y, '#4ecdc4', 5, 90);
+        beep(400 + hit * 90, 0.06, 'triangle', 0.04);
+      }
+
+      // ブロック
+      collideBricks();
+
+      // 落下
+      if (ball.y - ball.r > H) {
+        loseLife();
+        return;
+      }
+
+      if (state !== 'playing') return;
+    }
+  }
+
+  function collideBricks() {
+    for (const b of bricks) {
+      if (!b.alive) continue;
+
+      const nx = clamp(ball.x, b.x, b.x + b.w);
+      const ny = clamp(ball.y, b.y, b.y + b.h);
+      const dx = ball.x - nx;
+      const dy = ball.y - ny;
+      if (dx * dx + dy * dy > ball.r * ball.r) continue;
+
+      // めり込みが一番浅い方向へ押し出す
+      const oL = (ball.x + ball.r) - b.x;
+      const oR = (b.x + b.w) - (ball.x - ball.r);
+      const oT = (ball.y + ball.r) - b.y;
+      const oB = (b.y + b.h) - (ball.y - ball.r);
+      const m = Math.min(oL, oR, oT, oB);
+
+      if (m === oL) {
+        ball.x -= oL;
+        ball.vx = -Math.abs(ball.vx);
+      } else if (m === oR) {
+        ball.x += oR;
+        ball.vx = Math.abs(ball.vx);
+      } else if (m === oT) {
+        ball.y -= oT;
+        ball.vy = -Math.abs(ball.vy);
+      } else {
+        ball.y += oB;
+        ball.vy = Math.abs(ball.vy);
+      }
+
+      breakBrick(b);
+      return;
+    }
+  }
+
+  function breakBrick(b) {
+    b.alive = false;
+    score += 10 * level;
+    shake = Math.max(shake, 3);
+    burst(b.x + b.w / 2, b.y + b.h / 2, b.color, 14, 240);
+    beep(320 + Math.random() * 280, 0.07, 'square', 0.032);
+
+    if (score > best) {
+      best = score;
+      localStorage.setItem('neon-breaker-best', best);
+    }
+    syncHUD();
+
+    if (bricks.every(x => !x.alive)) levelClear();
+  }
+
+  function burst(x, y, color, n, power) {
+    for (let i = 0; i < n; i++) {
+      const a = Math.random() * Math.PI * 2;
+      const sp = (40 + Math.random() * power) * (power > 100 ? 1 : 0.8);
+      particles.push({
+        x, y,
+        vx: Math.cos(a) * sp,
+        vy: Math.sin(a) * sp - 40,
+        life: 0,
+        max: 0.35 + Math.random() * 0.45,
+        size: 2 + Math.random() * 3,
+        color
+      });
+    }
+  }
+
+  // ============================================================
+  //  描画
+  // ============================================================
+  let bgGrad = null;
+  let vignette = null;
+  const brickGrads = {};
+
+  function buildGradients() {
+    bgGrad = ctx.createLinearGradient(0, 0, 0, H);
+    bgGrad.addColorStop(0, '#0b1025');
+    bgGrad.addColorStop(0.55, '#0a0e1e');
+    bgGrad.addColorStop(1, '#070a14');
+
+    const minSide = Math.min(W, H);
+    vignette = ctx.createRadialGradient(W / 2, H * 0.42, minSide * 0.2, W / 2, H * 0.42, minSide * 1.04);
+    vignette.addColorStop(0, 'rgba(90, 120, 255, 0.10)');
+    vignette.addColorStop(0.55, 'rgba(0, 0, 0, 0)');
+    vignette.addColorStop(1, 'rgba(0, 0, 0, 0.55)');
+
+    for (const c of COLORS) {
+      const g = ctx.createLinearGradient(0, 0, 0, BH);
+      g.addColorStop(0, c);
+      g.addColorStop(1, 'rgba(4, 8, 20, 0.62)');
+      brickGrads[c] = g;
+    }
+  }
+
+  function roundRect(x, y, w, h, r) {
+    r = Math.min(r, w / 2, h / 2);
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+
+  function drawBackground() {
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, W, H);
+
+    ctx.strokeStyle = 'rgba(120, 160, 255, 0.045)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (let x = 0; x <= W; x += 40) {
+      ctx.moveTo(x + 0.5, 0);
+      ctx.lineTo(x + 0.5, H);
+    }
+    for (let y = 0; y <= H; y += 40) {
+      ctx.moveTo(0, y + 0.5);
+      ctx.lineTo(W, y + 0.5);
+    }
+    ctx.stroke();
+
+    ctx.fillStyle = vignette;
+    ctx.fillRect(0, 0, W, H);
+  }
+
+  function drawBricks(now) {
+    for (const b of bricks) {
+      if (!b.alive) continue;
+      ctx.save();
+      ctx.translate(b.x, b.y);
+      ctx.shadowColor = b.color;
+      ctx.shadowBlur = 12;
+      ctx.fillStyle = brickGrads[b.color];
+      roundRect(0, 0, b.w, b.h, 6);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.26)';
+      roundRect(2, 2, b.w - 4, 4, 2);
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  function drawPaddle() {
+    const px = paddle.x - paddle.w / 2;
+    ctx.save();
+    ctx.shadowColor = 'rgba(123, 97, 255, 0.9)';
+    ctx.shadowBlur = 22;
+    const g = ctx.createLinearGradient(px, 0, px + paddle.w, 0);
+    g.addColorStop(0, '#7b61ff');
+    g.addColorStop(1, '#4ecdc4');
+    ctx.fillStyle = g;
+    roundRect(px, paddle.y, paddle.w, paddle.h, 7);
+    ctx.fill();
+    ctx.restore();
+
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+    roundRect(px + 9, paddle.y + 3, paddle.w - 18, 3, 2);
+    ctx.fill();
+  }
+
+  function drawBall() {
+    for (let i = trail.length - 1; i >= 1; i--) {
+      const t = trail[i];
+      const k = 1 - i / trail.length;
+      ctx.globalAlpha = k * 0.3;
+      ctx.fillStyle = '#7b61ff';
+      ctx.beginPath();
+      ctx.arc(t.x, t.y, ball.r * (0.3 + 0.65 * k), 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    ctx.save();
+    ctx.shadowColor = '#4ecdc4';
+    ctx.shadowBlur = 24;
+    ctx.fillStyle = '#eafcff';
+    ctx.beginPath();
+    ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function drawParticles() {
+    for (const p of particles) {
+      const a = 1 - p.life / p.max;
+      ctx.globalAlpha = a;
+      ctx.fillStyle = p.color;
+      ctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function drawReadyHint(now) {
+    if (state !== 'ready') return;
+    const a = 0.5 + Math.sin(now * 4) * 0.28;
+    ctx.save();
+    ctx.globalAlpha = a;
+    ctx.fillStyle = '#cfd8ff';
+    ctx.font = '700 15px ui-sans-serif, system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('タップ / クリック / スペースで発射', W / 2, paddle.y - 60);
+    ctx.globalAlpha = 0.32;
+    ctx.font = '600 11px ui-sans-serif, system-ui, sans-serif';
+    ctx.fillText('パドルで角度をコントロール', W / 2, paddle.y - 40);
+    ctx.restore();
+  }
+
+  function render(now) {
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+
+    drawBackground();
+
+    ctx.save();
+    if (shake > 0.3) {
+      ctx.translate((Math.random() - 0.5) * shake, (Math.random() - 0.5) * shake);
+    }
+    drawBricks(now);
+    drawPaddle();
+    drawBall();
+    drawParticles();
+    ctx.restore();
+
+    drawReadyHint(now);
+  }
+
+  // ============================================================
+  //  メインループ
+  // ============================================================
+  function loop(t) {
+    const dt = Math.min((t - last) / 1000 || 0, 1 / 30);
+    last = t;
+
+    if (state === 'playing' || state === 'ready') update(dt);
+    render(t / 1000);
+
+    requestAnimationFrame(loop);
+  }
+
+  // ============================================================
+  //  入力
+  // ============================================================
+  function pointerX(e) {
+    const r = canvas.getBoundingClientRect();
+    return ((e.clientX - r.left) / r.width) * W;
+  }
+
+  canvas.addEventListener('pointermove', e => {
+    paddle.target = clamp(pointerX(e), paddle.w / 2, W - paddle.w / 2);
+  });
+
+  canvas.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    audio();
+    paddle.target = clamp(pointerX(e), paddle.w / 2, W - paddle.w / 2);
+    if (state === 'ready') launch();
+  }, { passive: false });
+
+  window.addEventListener('keydown', e => {
+    const k = e.key;
+
+    if (k === 'ArrowLeft' || k === 'a' || k === 'A') {
+      keyLeft = true;
+      e.preventDefault();
+    } else if (k === 'ArrowRight' || k === 'd' || k === 'D') {
+      keyRight = true;
+      e.preventDefault();
+    } else if (k === ' ' || k === 'Spacebar') {
+      e.preventDefault();
+      if (state === 'ready') launch();
+      else if (state === 'start' || state === 'over') startGame();
+    } else if (k === 'p' || k === 'P' || k === 'Escape') {
+      e.preventDefault();
+      togglePause();
+    } else if (k === 'r' || k === 'R') {
+      startGame();
+    } else if (k === 'm' || k === 'M') {
+      toggleSound();
+    }
+  });
+
+  window.addEventListener('keyup', e => {
+    const k = e.key;
+    if (k === 'ArrowLeft' || k === 'a' || k === 'A') keyLeft = false;
+    if (k === 'ArrowRight' || k === 'd' || k === 'D') keyRight = false;
+  });
+
+  window.addEventListener('blur', () => {
+    keyLeft = false;
+    keyRight = false;
+    if (state === 'playing') togglePause();
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden && state === 'playing') togglePause();
+  });
+
+  el.sound.addEventListener('click', toggleSound);
+
+  // ============================================================
+  //  開始
+  // ============================================================
+  let resizeQueued = 0;
+
+  window.addEventListener('resize', () => {
+    if (resizeQueued) return;
+    resizeQueued = requestAnimationFrame(() => {
+      resizeQueued = 0;
+      applyLayout(state !== 'start' && state !== 'over');
+      last = performance.now();
+    });
+  });
+
+  applyLayout(false);
+  state = 'start';
+  syncHUD();
+
+  showOverlay(
+    'NEON BREAKER',
+    'マウス・タッチ・<kbd>←</kbd><kbd>→</kbd> でパドルを動かし、<br>ボールでブロックをすべて壊そう。',
+    'スタート',
+    startGame
+  );
+
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
