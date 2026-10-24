@@ -829,9 +829,9 @@
   const TRAIL_MAX = IS_MOBILE ? 10 : 16;
   const PARTICLE_MAX = IS_MOBILE ? 120 : 320;
   const PARTICLE_SCALE = IS_MOBILE ? 0.55 : 1;
-  const STATE_HZ = 40;
+  const STATE_HZ = 60;
   const INPUT_HZ = 60;
-  const INTERP_DELAY = 0.10;
+  const INTERP_DELAY = 0.06;
   const RENDER_MIN_MS = IS_MOBILE ? (1000 / 60 - 2) : 0;
 
   const canvas = document.getElementById('game');
@@ -987,6 +987,8 @@
     lastSentY: H / 2,
     ping: 0,
     pingTimer: 0,
+    oneWay: 0,
+    oneWayTarget: 0,
     guestY: H / 2,
     pauseState: 'play',
     rematchPending: false,
@@ -1249,7 +1251,7 @@
     if (net.heartbeat) clearInterval(net.heartbeat);
     net.lastRx = performance.now();
 
-    net.heartbeat = setInterval(() => {
+    const tick = () => {
       if (!net.connected) return;
       send({ t: 'ping', ts: performance.now() });
 
@@ -1263,7 +1265,10 @@
       if (performance.now() - net.lastRx > 12000) {
         onDisconnect();
       }
-    }, 2500);
+    };
+
+    tick();
+    net.heartbeat = setInterval(tick, 2500);
   }
 
   function publishBye() {
@@ -1649,6 +1654,8 @@
     net.snapAt = 0;
     net.snapshots.length = 0;
     net.clockOffset = null;
+    net.oneWay = 0;
+    net.oneWayTarget = 0;
     net.lastPhase = 'serve';
     net.lastScores.left = 0;
     net.lastScores.right = 0;
@@ -1739,6 +1746,8 @@
     net.snapAt = 0;
     net.snapshots.length = 0;
     net.clockOffset = null;
+    net.oneWay = net.ping ? Math.min(250, net.ping / 2) : 0;
+    net.oneWayTarget = net.oneWay;
     net.rematchPending = false;
 
     resetBall();
@@ -1777,6 +1786,8 @@
     net.snapAt = 0;
     net.snapshots.length = 0;
     net.clockOffset = null;
+    net.oneWay = net.ping ? Math.min(250, net.ping / 2) : 0;
+    net.oneWayTarget = net.oneWay;
     net.lastEvent = 0;
     net.rematchPending = false;
     el.ovBtn.disabled = false;
@@ -2020,6 +2031,7 @@
     if (msg.t === 'pong') {
       if (typeof msg.ts === 'number') {
         net.ping = Math.max(1, Math.round(performance.now() - msg.ts));
+        net.oneWayTarget = Math.min(250, net.ping / 2);
         updateModeUI();
       }
       return;
@@ -2334,7 +2346,7 @@
       p.prev = p.cy;
 
       if (mode === 'host' && p.side === 'right') {
-        p.cy += (net.guestY - p.cy) * Math.min(1, dt * 45);
+        p.cy = net.guestY;
       } else {
         const d = inputDir(p.side);
         if (d !== 0) p.cy += d * CFG.paddle.speed * dt;
@@ -2359,7 +2371,7 @@
     const useHost = net.clockOffset !== null && buf[buf.length - 1].ht !== null;
     const key = useHost ? 'ht' : 'at';
     const target = useHost
-      ? now - net.clockOffset - INTERP_DELAY * 1000
+      ? now - net.clockOffset + net.oneWay - INTERP_DELAY * 1000
       : now - INTERP_DELAY * 1000;
 
     if (target <= buf[0][key]) {
@@ -2368,7 +2380,7 @@
 
     const last = buf[buf.length - 1];
     if (target >= last[key]) {
-      const extra = Math.min((target - last[key]) / 1000, 0.12);
+      const extra = Math.min((target - last[key]) / 1000, 0.18);
       return {
         cur: last.msg,
         prev: buf.length > 1 ? buf[buf.length - 2].msg : null,
@@ -2406,6 +2418,7 @@
     p2.vy = (p2.cy - p2.prev) / Math.max(dt, 0.0001);
 
     const now = performance.now();
+    net.oneWay += (net.oneWayTarget - net.oneWay) * (1 - Math.exp(-3 * dt));
     const interp = guestInterp(now);
 
     // 相手（P1）のパドルも同じ遅延バッファで補間する
@@ -2422,6 +2435,29 @@
 
     updateGuestBall(now, interp);
     sendGuestInput(dt);
+  }
+
+  function extrapolateGuestBall(x, y, vx, vy, seconds) {
+    let remain = seconds;
+    for (let i = 0; i < 4 && remain > 0; i++) {
+      const tY = vy > 0
+        ? (H - ball.r - y) / vy
+        : vy < 0
+          ? (ball.r - y) / vy
+          : Infinity;
+      if (tY > 0 && tY < remain) {
+        x += vx * tY;
+        y += vy * tY;
+        remain -= tY;
+        vy = -vy;
+        y = clamp(y, ball.r, H - ball.r);
+      } else {
+        x += vx * remain;
+        y += vy * remain;
+        remain = 0;
+      }
+    }
+    return { x: clamp(x, ball.r, W - ball.r), y: clamp(y, ball.r, H - ball.r) };
   }
 
   function updateGuestBall(now, interp) {
@@ -2445,8 +2481,9 @@
       }
 
       if (interp.extra > 0) {
-        tx += vx * interp.extra;
-        ty += vy * interp.extra;
+        const predicted = extrapolateGuestBall(tx, ty, vx, vy, interp.extra);
+        tx = predicted.x;
+        ty = predicted.y;
       }
 
       ball.x = clamp(tx, ball.r, W - ball.r);
