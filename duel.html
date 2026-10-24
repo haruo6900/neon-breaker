@@ -831,7 +831,7 @@
   const PARTICLE_SCALE = IS_MOBILE ? 0.55 : 1;
   const STATE_HZ = 40;
   const INPUT_HZ = 60;
-  const INTERP_DELAY = 0.055;
+  const INTERP_DELAY = 0.10;
   const RENDER_MIN_MS = IS_MOBILE ? (1000 / 60 - 2) : 0;
 
   const canvas = document.getElementById('game');
@@ -972,8 +972,8 @@
     started: false,
     snapshot: null,
     snapAt: 0,
-    prevSnapshot: null,
-    prevSnapAt: 0,
+    snapshots: [],
+    clockOffset: null,
     lastPhase: 'serve',
     lastEvent: 0,
     lastScores: { left: 0, right: 0 },
@@ -1647,8 +1647,8 @@
     net.lastRx = 0;
     net.snapshot = null;
     net.snapAt = 0;
-    net.prevSnapshot = null;
-    net.prevSnapAt = 0;
+    net.snapshots.length = 0;
+    net.clockOffset = null;
     net.lastPhase = 'serve';
     net.lastScores.left = 0;
     net.lastScores.right = 0;
@@ -1737,8 +1737,8 @@
     net.guestY = H / 2;
     net.snapshot = null;
     net.snapAt = 0;
-    net.prevSnapshot = null;
-    net.prevSnapAt = 0;
+    net.snapshots.length = 0;
+    net.clockOffset = null;
     net.rematchPending = false;
 
     resetBall();
@@ -1775,8 +1775,8 @@
     if (typeof sd === 'number') serveDir = sd;
     net.snapshot = null;
     net.snapAt = 0;
-    net.prevSnapshot = null;
-    net.prevSnapAt = 0;
+    net.snapshots.length = 0;
+    net.clockOffset = null;
     net.lastEvent = 0;
     net.rematchPending = false;
     el.ovBtn.disabled = false;
@@ -2084,19 +2084,14 @@
     }
 
     const now = performance.now();
-    if (net.snapshot && net.snapAt && net.snapshot.ph === msg.ph && now - net.snapAt < 400) {
-      net.prevSnapshot = net.snapshot;
-      net.prevSnapAt = net.snapAt;
-    } else {
-      net.prevSnapshot = null;
-      net.prevSnapAt = 0;
-    }
+    const phaseChanged = net.lastPhase !== msg.ph;
     net.snapshot = msg;
     net.snapAt = now;
     net.lastPhase = msg.ph;
 
     const sc = Array.isArray(msg.sc) ? msg.sc : [scores.left, scores.right];
-    if (sc[0] !== scores.left || sc[1] !== scores.right) {
+    const scoreChanged = sc[0] !== scores.left || sc[1] !== scores.right;
+    if (scoreChanged) {
       const prevLeft = scores.left;
       scores.left = Number(sc[0]) || 0;
       scores.right = Number(sc[1]) || 0;
@@ -2112,6 +2107,23 @@
         26, 340
       );
       tone(200, 0.18, 'sawtooth', 0.05, 110);
+    }
+
+    if (typeof msg.ht === 'number') {
+      const d = now - msg.ht;
+      if (net.clockOffset === null || d < net.clockOffset) net.clockOffset = d;
+    }
+
+    if (msg.ph === 'play' && Array.isArray(msg.b)) {
+      if (phaseChanged || scoreChanged) net.snapshots.length = 0;
+      net.snapshots.push({
+        at: now,
+        ht: typeof msg.ht === 'number' ? msg.ht : null,
+        msg
+      });
+      if (net.snapshots.length > 16) net.snapshots.shift();
+    } else {
+      net.snapshots.length = 0;
     }
 
     if (typeof msg.ev === 'number' && msg.ev > net.lastEvent) {
@@ -2150,6 +2162,7 @@
     send({
       t: 's',
       q: net.seq,
+      ht: Math.round(performance.now()),
       b: [r1(ball.x), r1(ball.y), Math.round(ball.vx), Math.round(ball.vy)],
       p1: r1(p1.cy),
       p2: r1(p2.cy),
@@ -2333,16 +2346,52 @@
   }
 
   function guestInterp(now) {
-    const cur = net.snapshot;
-    if (!cur || !net.snapAt) return { cur: null, prev: null, alpha: 1, age: 0 };
+    const latest = net.snapshot;
+    if (!latest) return { cur: null, prev: null, alpha: 1, extra: 0 };
 
-    const age = Math.max(0, (now - net.snapAt) / 1000);
-    let alpha = 1;
-    if (net.prevSnapshot && net.prevSnapAt && now - net.prevSnapAt < 500) {
-      const interval = Math.max(0.012, (net.snapAt - net.prevSnapAt) / 1000);
-      alpha = clamp(1 - (INTERP_DELAY - age) / interval, 0, 1);
+    const buf = net.snapshots;
+    if (!buf.length) {
+      return { cur: latest, prev: null, alpha: 1, extra: 0 };
     }
-    return { cur, prev: net.prevSnapshot, alpha, age };
+
+    // 受信時刻ではなくホスト時刻を基準に補間する。
+    // 到着がまとまってもボールが飛ばず、固定遅延バッファで揺れを吸収できる。
+    const useHost = net.clockOffset !== null && buf[buf.length - 1].ht !== null;
+    const key = useHost ? 'ht' : 'at';
+    const target = useHost
+      ? now - net.clockOffset - INTERP_DELAY * 1000
+      : now - INTERP_DELAY * 1000;
+
+    if (target <= buf[0][key]) {
+      return { cur: buf[0].msg, prev: null, alpha: 1, extra: 0 };
+    }
+
+    const last = buf[buf.length - 1];
+    if (target >= last[key]) {
+      const extra = Math.min((target - last[key]) / 1000, 0.12);
+      return {
+        cur: last.msg,
+        prev: buf.length > 1 ? buf[buf.length - 2].msg : null,
+        alpha: 1,
+        extra
+      };
+    }
+
+    for (let i = buf.length - 1; i > 0; i--) {
+      const a = buf[i - 1];
+      const b = buf[i];
+      if (target >= a[key] && target <= b[key]) {
+        const span = Math.max(1, b[key] - a[key]);
+        return {
+          cur: b.msg,
+          prev: a.msg,
+          alpha: (target - a[key]) / span,
+          extra: 0
+        };
+      }
+    }
+
+    return { cur: last.msg, prev: null, alpha: 1, extra: 0 };
   }
 
   function updateGuest(dt) {
@@ -2359,10 +2408,10 @@
     const now = performance.now();
     const interp = guestInterp(now);
 
-    // 相手（P1）のパドルもスナップショット間を補間して滑らかにする
+    // 相手（P1）のパドルも同じ遅延バッファで補間する
     if (interp.cur && typeof interp.cur.p1 === 'number') {
       let target = Number(interp.cur.p1);
-      if (interp.prev && typeof interp.prev.p1 === 'number' && interp.alpha < 1) {
+      if (interp.prev && typeof interp.prev.p1 === 'number') {
         const prevY = Number(interp.prev.p1);
         target = prevY + (target - prevY) * interp.alpha;
       }
@@ -2388,17 +2437,16 @@
       let tx = bx;
       let ty = by;
 
-      if (interp.prev && interp.prev.ph === 'play' && Array.isArray(interp.prev.b) && interp.alpha < 1) {
+      if (interp.prev && interp.prev.ph === 'play' && Array.isArray(interp.prev.b)) {
         const px = Number(interp.prev.b[0]) || bx;
         const py = Number(interp.prev.b[1]) || by;
         tx = px + (bx - px) * interp.alpha;
         ty = py + (by - py) * interp.alpha;
       }
 
-      const extra = Math.min(Math.max(interp.age - INTERP_DELAY, 0), 0.12);
-      if (extra > 0) {
-        tx += vx * extra;
-        ty += vy * extra;
+      if (interp.extra > 0) {
+        tx += vx * interp.extra;
+        ty += vy * interp.extra;
       }
 
       ball.x = clamp(tx, ball.r, W - ball.r);
@@ -2409,8 +2457,9 @@
       trail.unshift({ x: ball.x, y: ball.y });
       if (trail.length > TRAIL_MAX) trail.pop();
     } else {
-      ball.x = bx;
-      ball.y = by;
+      const latest = net.snapshot || s;
+      ball.x = Number(latest.b[0]) || 0;
+      ball.y = Number(latest.b[1]) || 0;
       ball.vx = 0;
       ball.vy = 0;
       trail.length = 0;
