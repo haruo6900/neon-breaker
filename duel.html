@@ -829,7 +829,7 @@
   const TRAIL_MAX = IS_MOBILE ? 10 : 16;
   const PARTICLE_MAX = IS_MOBILE ? 120 : 320;
   const PARTICLE_SCALE = IS_MOBILE ? 0.55 : 1;
-  const STATE_HZ = 60;
+  const STATE_HZ = 30;
   const INPUT_HZ = 60;
   const INTERP_DELAY = 0.06;
   const RENDER_MIN_MS = IS_MOBILE ? (1000 / 60 - 2) : 0;
@@ -1746,7 +1746,7 @@
     net.snapAt = 0;
     net.snapshots.length = 0;
     net.clockOffset = null;
-    net.oneWay = net.ping ? Math.min(250, net.ping / 2) : 0;
+    net.oneWay = net.ping ? Math.min(250, net.ping / 2) : 80;
     net.oneWayTarget = net.oneWay;
     net.rematchPending = false;
 
@@ -1786,7 +1786,7 @@
     net.snapAt = 0;
     net.snapshots.length = 0;
     net.clockOffset = null;
-    net.oneWay = net.ping ? Math.min(250, net.ping / 2) : 0;
+    net.oneWay = net.ping ? Math.min(250, net.ping / 2) : 80;
     net.oneWayTarget = net.oneWay;
     net.lastEvent = 0;
     net.rematchPending = false;
@@ -2380,7 +2380,7 @@
 
     const last = buf[buf.length - 1];
     if (target >= last[key]) {
-      const extra = Math.min((target - last[key]) / 1000, 0.18);
+      const extra = Math.min((target - last[key]) / 1000, 1.5);
       return {
         cur: last.msg,
         prev: buf.length > 1 ? buf[buf.length - 2].msg : null,
@@ -2433,34 +2433,61 @@
       p1.vy = (p1.cy - p1.prev) / Math.max(dt, 0.0001);
     }
 
-    updateGuestBall(now, interp);
+    updateGuestBall(dt, now, interp);
     sendGuestInput(dt);
   }
 
-  function extrapolateGuestBall(x, y, vx, vy, seconds) {
+  function extrapolateGuestBall(x, y, vx, vy, seconds, hostP1, hostP2) {
+    const step = 1 / 120;
     let remain = seconds;
-    for (let i = 0; i < 4 && remain > 0; i++) {
-      const tY = vy > 0
-        ? (H - ball.r - y) / vy
-        : vy < 0
-          ? (ball.r - y) / vy
-          : Infinity;
-      if (tY > 0 && tY < remain) {
-        x += vx * tY;
-        y += vy * tY;
-        remain -= tY;
-        vy = -vy;
-        y = clamp(y, ball.r, H - ball.r);
-      } else {
-        x += vx * remain;
-        y += vy * remain;
-        remain = 0;
+    let steps = Math.min(180, Math.ceil(remain / step));
+    const leftFace = p1.x + p1.w / 2;
+    const rightFace = p2.x - p2.w / 2;
+
+    for (let i = 0; i < steps; i++) {
+      const dt = Math.min(step, remain);
+      x += vx * dt;
+      y += vy * dt;
+      remain -= dt;
+
+      if (y - ball.r < 0) {
+        y = ball.r;
+        vy = Math.abs(vy);
+      } else if (y + ball.r > H) {
+        y = H - ball.r;
+        vy = -Math.abs(vy);
       }
+
+      const canHitP1 = vx < 0 && x - ball.r <= leftFace && x >= p1.x - p1.w / 2 - ball.r;
+      const canHitP2 = vx > 0 && x + ball.r >= rightFace && x <= p2.x + p2.w / 2 + ball.r;
+      const yNearP1 = Math.abs(y - hostP1) <= p1.h / 2 + ball.r;
+      const yNearP2 = Math.abs(y - hostP2) <= p2.h / 2 + ball.r;
+
+      if ((canHitP1 && yNearP1) || (canHitP2 && yNearP2)) {
+        const side = canHitP1 ? 'left' : 'right';
+        const py = side === 'left' ? hostP1 : hostP2;
+        const rel = clamp((y - py) / (p1.h / 2), -1, 1);
+        const speed = Math.min(
+          Math.hypot(vx, vy) * CFG.ball.accel + CFG.ball.boost,
+          CFG.ball.maxSpeed
+        );
+        const ang = clamp(rel * 0.92, -1.05, 1.05);
+        const dir = side === 'left' ? 1 : -1;
+        vx = Math.cos(ang) * speed * dir;
+        vy = Math.sin(ang) * speed;
+        const minVy = speed * 0.07;
+        if (Math.abs(vy) < minVy) vy = (vy >= 0 ? 1 : -1) * minVy;
+        if (side === 'left') x = leftFace + ball.r + 0.1;
+        else x = rightFace - ball.r - 0.1;
+      }
+
+      if (x < -ball.r * 2 || x > W + ball.r * 2) break;
     }
+
     return { x: clamp(x, ball.r, W - ball.r), y: clamp(y, ball.r, H - ball.r) };
   }
 
-  function updateGuestBall(now, interp) {
+  function updateGuestBall(dt, now, interp) {
     const s = interp.cur;
     if (!s || !Array.isArray(s.b)) return;
 
@@ -2481,15 +2508,29 @@
       }
 
       if (interp.extra > 0) {
-        const predicted = extrapolateGuestBall(tx, ty, vx, vy, interp.extra);
+        const hostP1 = Number(s.p1) || p1.cy;
+        const hostP2 = Number(s.p2) || p2.cy;
+        const predicted = extrapolateGuestBall(tx, ty, vx, vy, interp.extra, hostP1, hostP2);
         tx = predicted.x;
         ty = predicted.y;
       }
 
-      ball.x = clamp(tx, ball.r, W - ball.r);
-      ball.y = clamp(ty, ball.r, H - ball.r);
       ball.vx = vx;
       ball.vy = vy;
+
+      // 通信が詰まった後の大きなズレはワープさせず、短時間で寄せる
+      const tx2 = clamp(tx, ball.r, W - ball.r);
+      const ty2 = clamp(ty, ball.r, H - ball.r);
+      const dx = tx2 - ball.x;
+      const dy = ty2 - ball.y;
+      if (Math.hypot(dx, dy) > 60) {
+        const k = 1 - Math.exp(-8 * dt);
+        ball.x += dx * k;
+        ball.y += dy * k;
+      } else {
+        ball.x = tx2;
+        ball.y = ty2;
+      }
 
       trail.unshift({ x: ball.x, y: ball.y });
       if (trail.length > TRAIL_MAX) trail.pop();
