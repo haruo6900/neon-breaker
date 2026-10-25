@@ -1313,9 +1313,15 @@
   async function initRtcHost() {
     if (mode !== 'host' || net.rtc || !window.RTCPeerConnection) return;
 
-    const pc = new RTCPeerConnection(RTC_CONFIG);
+    let pc;
+    let dc;
+    try {
+      pc = new RTCPeerConnection(RTC_CONFIG);
+      dc = pc.createDataChannel('duel', { ordered: true });
+    } catch (e) {
+      return;
+    }
     net.rtc = pc;
-    const dc = pc.createDataChannel('duel', { ordered: true });
     setupRtcChannel(dc);
 
     pc.onicecandidate = e => {
@@ -1335,7 +1341,12 @@
   async function acceptRtcOffer(msg) {
     if (mode !== 'guest' || net.rtc || !window.RTCPeerConnection || !msg.sdp) return;
 
-    const pc = new RTCPeerConnection(RTC_CONFIG);
+    let pc;
+    try {
+      pc = new RTCPeerConnection(RTC_CONFIG);
+    } catch (e) {
+      return;
+    }
     net.rtc = pc;
 
     pc.ondatachannel = e => {
