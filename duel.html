@@ -951,6 +951,12 @@
     'https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js'
   ];
   const TOPIC_PREFIX = 'neon-duel/v1/';
+  const RTC_CONFIG = {
+    iceServers: [
+      { urls: 'stun:stun.l.google.com:19302' },
+      { urls: 'stun:stun1.l.google.com:19302' }
+    ]
+  };
   const ROOM_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   let mqttLoader = null;
 
@@ -989,6 +995,11 @@
     pingTimer: 0,
     oneWay: 0,
     oneWayTarget: 0,
+    rtc: null,
+    rtcDc: null,
+    rtcOpen: false,
+    rtcIce: [],
+    lastSeq: 0,
     guestY: H / 2,
     pauseState: 'play',
     rematchPending: false,
@@ -1086,10 +1097,11 @@
   el.ovBtn2.addEventListener('click', () => runOverlayAction(overlayAction2));
 
   function updateModeUI() {
+    const link = net.rtcOpen ? 'P2P' : 'ONLINE';
     if (mode === 'host') {
-      el.modeLabel.textContent = 'P1 YOU' + (net.ping ? ' · ' + net.ping + 'ms' : ' · ONLINE');
+      el.modeLabel.textContent = 'P1 YOU' + (net.ping ? ' · ' + net.ping + 'ms ' : ' · ') + link;
     } else if (mode === 'guest') {
-      el.modeLabel.textContent = 'P2 YOU' + (net.ping ? ' · ' + net.ping + 'ms' : ' · ONLINE');
+      el.modeLabel.textContent = 'P2 YOU' + (net.ping ? ' · ' + net.ping + 'ms ' : ' · ') + link;
     } else {
       el.modeLabel.textContent = 'FIRST TO 7';
     }
@@ -1245,6 +1257,134 @@
     };
 
     return conn;
+  }
+
+  // WebRTCのシグナリングはMQTT、ゲームの状態と入力はP2Pへ切り替える
+  function sendSignal(msg) {
+    if (!net.mqtt || !net.mqtt.connected || !net.outTopic) return;
+    try {
+      net.mqtt.publish(net.outTopic, JSON.stringify(msg), { qos: 1, retain: false });
+    } catch (e) { /* 無視 */ }
+  }
+
+  function closeRtc() {
+    if (net.rtcDc) {
+      try { net.rtcDc.close(); } catch (e) { /* 無視 */ }
+    }
+    if (net.rtc) {
+      try { net.rtc.close(); } catch (e) { /* 無視 */ }
+    }
+    net.rtc = null;
+    net.rtcDc = null;
+    net.rtcOpen = false;
+    net.rtcIce.length = 0;
+  }
+
+  function setupRtcChannel(dc) {
+    net.rtcDc = dc;
+    dc.onopen = () => {
+      if (net.rtcDc !== dc) return;
+      net.rtcOpen = true;
+      net.clockOffset = null;
+      net.snapshots.length = 0;
+      net.oneWay = 0;
+      net.oneWayTarget = 0;
+      send({ t: 'ping', ts: performance.now() });
+      updateModeUI();
+    };
+    dc.onclose = () => {
+      if (net.rtcDc !== dc) return;
+      net.rtcOpen = false;
+      net.clockOffset = null;
+      net.snapshots.length = 0;
+      net.oneWay = 80;
+      net.oneWayTarget = 80;
+      updateModeUI();
+    };
+    dc.onmessage = e => {
+      let msg;
+      try { msg = JSON.parse(e.data); } catch (err) { return; }
+      if (!msg || typeof msg !== 'object') return;
+      net.lastRx = performance.now();
+      handleNetData(msg);
+    };
+  }
+
+  async function initRtcHost() {
+    if (mode !== 'host' || net.rtc || !window.RTCPeerConnection) return;
+
+    const pc = new RTCPeerConnection(RTC_CONFIG);
+    net.rtc = pc;
+    const dc = pc.createDataChannel('duel', { ordered: true });
+    setupRtcChannel(dc);
+
+    pc.onicecandidate = e => {
+      if (net.rtc !== pc || !e.candidate) return;
+      sendSignal({ t: 'rtc-ice', c: e.candidate.toJSON() });
+    };
+
+    try {
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+      if (net.rtc === pc) sendSignal({ t: 'rtc-offer', sdp: pc.localDescription });
+    } catch (e) {
+      if (net.rtc === pc) closeRtc();
+    }
+  }
+
+  async function acceptRtcOffer(msg) {
+    if (mode !== 'guest' || net.rtc || !window.RTCPeerConnection || !msg.sdp) return;
+
+    const pc = new RTCPeerConnection(RTC_CONFIG);
+    net.rtc = pc;
+
+    pc.ondatachannel = e => {
+      if (net.rtc !== pc) return;
+      setupRtcChannel(e.channel);
+    };
+    pc.onicecandidate = e => {
+      if (net.rtc !== pc || !e.candidate) return;
+      sendSignal({ t: 'rtc-ice', c: e.candidate.toJSON() });
+    };
+
+    try {
+      await pc.setRemoteDescription(msg.sdp);
+      flushRtcIce();
+      const answer = await pc.createAnswer();
+      await pc.setLocalDescription(answer);
+      if (net.rtc === pc) sendSignal({ t: 'rtc-answer', sdp: pc.localDescription });
+    } catch (e) {
+      if (net.rtc === pc) closeRtc();
+    }
+  }
+
+  async function acceptRtcAnswer(msg) {
+    if (mode !== 'host' || !net.rtc || !msg.sdp) return;
+    try {
+      await net.rtc.setRemoteDescription(msg.sdp);
+      flushRtcIce();
+    } catch (e) {
+      closeRtc();
+    }
+  }
+
+  function flushRtcIce() {
+    if (!net.rtc || !net.rtc.remoteDescription) return;
+    const queued = net.rtcIce.splice(0);
+    for (const c of queued) {
+      net.rtc.addIceCandidate(c).catch(() => {});
+    }
+  }
+
+  async function acceptRtcIce(msg) {
+    if (!net.rtc || !msg.c) return;
+    if (!net.rtc.remoteDescription) {
+      net.rtcIce.push(msg.c);
+      return;
+    }
+    try {
+      await net.rtc.addIceCandidate(msg.c);
+    } catch (e) { /* 無視 */ }
   }
 
   function startNetHeartbeat() {
@@ -1583,6 +1723,7 @@
         updateModeUI();
         hideLobby();
         hostStartRematch();
+        initRtcHost();
       } else {
         mode = 'guest';
         updateModeUI();
@@ -1607,6 +1748,12 @@
   }
 
   function send(msg) {
+    if (net.rtcOpen && net.rtcDc && net.rtcDc.readyState === 'open') {
+      try {
+        net.rtcDc.send(JSON.stringify(msg));
+        return;
+      } catch (e) { /* MQTTへフォールバック */ }
+    }
     if (net.conn && net.conn.open) {
       try { net.conn.send(msg); } catch (e) { /* 無視 */ }
     }
@@ -1635,6 +1782,9 @@
       net.conn = null;
       try { conn.close(); } catch (e) { /* 無視 */ }
     }
+
+    closeRtc();
+    net.lastSeq = 0;
 
     if (net.mqtt) {
       const client = net.mqtt;
@@ -1746,10 +1896,10 @@
     net.snapAt = 0;
     net.snapshots.length = 0;
     net.clockOffset = null;
+    net.lastSeq = 0;
     net.oneWay = net.ping ? Math.min(250, net.ping / 2) : 80;
     net.oneWayTarget = net.oneWay;
     net.rematchPending = false;
-
     resetBall();
     serveDir = Math.random() < 0.5 ? -1 : 1;
     serveTimer = CFG.serveDelay;
@@ -1786,6 +1936,7 @@
     net.snapAt = 0;
     net.snapshots.length = 0;
     net.clockOffset = null;
+    net.lastSeq = 0;
     net.oneWay = net.ping ? Math.min(250, net.ping / 2) : 80;
     net.oneWayTarget = net.oneWay;
     net.lastEvent = 0;
@@ -2040,6 +2191,18 @@
       onDisconnect();
       return;
     }
+    if (msg.t === 'rtc-offer') {
+      acceptRtcOffer(msg);
+      return;
+    }
+    if (msg.t === 'rtc-answer') {
+      acceptRtcAnswer(msg);
+      return;
+    }
+    if (msg.t === 'rtc-ice') {
+      acceptRtcIce(msg);
+      return;
+    }
 
     if (mode === 'host') {
       if (msg.t === 'i') {
@@ -2085,6 +2248,11 @@
 
   function handleGuestState(msg) {
     if (mode !== 'guest' || !Array.isArray(msg.b)) return;
+
+    if (typeof msg.q === 'number') {
+      if (msg.q <= net.lastSeq) return;
+      net.lastSeq = msg.q;
+    }
 
     if (typeof msg.sid === 'number') {
       if (state === 'over' && msg.sid !== net.lastStartId) {
