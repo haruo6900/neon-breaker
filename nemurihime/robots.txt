@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# 公開ドメインが決まったら、次の1行を追加してください。
+# Sitemap: https://example.com/sitemap.xml

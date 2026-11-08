@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 340" preserveAspectRatio="none">
+  <defs>
+    <linearGradient id="far" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1a0f38"/>
+      <stop offset="1" stop-color="#120a2a"/>
+    </linearGradient>
+    <linearGradient id="near" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0b0620"/>
+      <stop offset="1" stop-color="#05030c"/>
+    </linearGradient>
+    <linearGradient id="mist" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3a2470" stop-opacity="0"/>
+      <stop offset="1" stop-color="#2a1758" stop-opacity=".35"/>
+    </linearGradient>
+  </defs>
+
+  <!-- far treeline -->
+  <path fill="url(#far)" opacity=".8" d="M0 340V208l24-38 20 38 30-70 30 70 22-30 26 46 36-96 36 96 24-40 28 62 38-104 38 104 26-46 30 70 34-92 34 92 26-40 30 62 38-108 38 108 26-48 30 74 32-88 32 88 26-36 30 58 38-100 38 100 26-44 30 68 34-90 34 90 26-38 30 60 38-102 38 102 26-46 30 70 34-86 34 86 26-34 28 54 34-92 34 92 24-40 26 60 30-80 30 80 26-38 30 64 34-94 34 94 26-44 28 68 30-82 30 82 24-42 28 62 26-40V340Z"/>
+
+  <!-- near treeline -->
+  <path fill="url(#near)" d="M0 340V252l34-52 30 52 40-100 44 100 32-44 38 78 46-120 48 120 34-58 40 82 48-132 50 132 34-62 40 86 46-124 46 124 34-56 40 80 48-128 48 128 34-60 40 84 46-122 46 122 34-54 38 78 48-126 48 126 32-58 40 82 46-120 46 120 34-54 38 76 46-118 46 118 32-56 38 78 44-114 44 114 34-50 36 72 30-48V340Z"/>
+
+  <!-- mist -->
+  <rect y="190" width="1440" height="150" fill="url(#mist)"/>
+</svg>
