@@ -103,15 +103,15 @@
   /* ---------- offscreen radar ---------- */
   #radarLayer{position:fixed;inset:0;z-index:5;pointer-events:none;overflow:hidden}
   .radar{
-    position:absolute;left:0;top:0;width:11px;height:11px;border-radius:50%;
-    border:1px solid rgba(233,170,106,.9);background:rgba(110,231,168,.35);
-    box-shadow:0 0 10px rgba(110,231,168,.55);opacity:.85;display:none;
+    position:absolute;left:0;top:0;width:13px;height:13px;border-radius:50%;
+    border:1px solid rgba(255,226,150,.95);background:rgba(110,231,168,.5);
+    box-shadow:0 0 12px rgba(110,231,168,.9);opacity:.92;display:none;
     will-change:transform;
   }
   .radar.boss{
-    width:26px;height:26px;border:0;border-radius:0;background:var(--red);
+    width:28px;height:28px;border:0;border-radius:0;background:var(--red);
     clip-path:polygon(50% 0,100% 100%,50% 76%,0 100%);
-    box-shadow:none;filter:drop-shadow(0 0 8px rgba(224,90,79,.95));opacity:1;
+    box-shadow:none;filter:drop-shadow(0 0 10px rgba(224,90,79,1));opacity:1;
   }
 
   /* ---------- HUD ---------- */
@@ -1606,7 +1606,7 @@ function initThree() {
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.25;
+  renderer.toneMappingExposure = useTouchUI ? 1.4 : 1.25;
   dom.webgl.appendChild(renderer.domElement);
 
   scene = new THREE.Scene();
@@ -1651,6 +1651,7 @@ function initThree() {
 
 function onResize() {
   if (!renderer || !camera) return;
+  camera.fov = useTouchUI && innerHeight > innerWidth ? 70 : 54;
   camera.aspect = innerWidth / innerHeight;
   camera.updateProjectionMatrix();
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isTouch ? 1.7 : 2));
@@ -2377,11 +2378,11 @@ function applyStageTheme(index) {
   if (scratch.hemi) {
     scratch.hemi.color.setHex(c.hemiSky);
     scratch.hemi.groundColor.setHex(c.hemiGround);
-    scratch.hemi.intensity = c.hemiIntensity;
+    scratch.hemi.intensity = c.hemiIntensity * (useTouchUI ? 1.25 : 1);
   }
   if (scratch.moon) {
     scratch.moon.color.setHex(c.moon);
-    scratch.moon.intensity = c.moonIntensity;
+    scratch.moon.intensity = c.moonIntensity * (useTouchUI ? 1.12 : 1);
   }
   if (scratch.rim) scratch.rim.color.setHex(c.rim);
   if (scratch.torchFlameMat) scratch.torchFlameMat.color.setHex(c.torch);
@@ -2523,7 +2524,7 @@ function updateDamageNumbers(dt) {
 
 /* --------------------------- radar --------------------------- */
 function buildRadarLayer() {
-  for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < 14; i++) {
     const el = document.createElement("div");
     el.className = "radar";
     dom.radarLayer.appendChild(el);
@@ -2546,7 +2547,7 @@ function updateRadar() {
     const l = Math.hypot(dx, dz) || 1;
     list.push({ e, dx: dx / l, dy: -dz / l });
   }
-  list.sort((a, b) => (b.e.type === "boss" ? 1 : 0) - (a.e.type === "boss" ? 1 : 0));
+  list.sort((a, b) => (isBossType(b.e.type) ? 1 : 0) - (isBossType(a.e.type) ? 1 : 0));
   const cx = innerWidth / 2;
   const cy = innerHeight / 2;
   const R = Math.min(innerWidth, innerHeight) * 0.355;
@@ -2554,7 +2555,7 @@ function updateRadar() {
     const it = radarPool[i];
     if (i < list.length) {
       const d = list[i];
-      const boss = d.e.type === "boss";
+      const boss = isBossType(d.e.type);
       const x = clamp(cx + d.dx * R, 16, innerWidth - 16);
       const y = clamp(cy + d.dy * R, 16, innerHeight - 16);
       const ang = Math.atan2(d.dx, -d.dy);
@@ -3057,6 +3058,7 @@ function createEnemyMesh(type, def) {
     coreMat.emissive.setHex(0xb03a20);
     coreMat.emissiveIntensity = 0.45;
   }
+  if (useTouchUI) coreMat.emissiveIntensity *= 1.35;
   const add = (parent, mesh, x = 0, y = 0, z = 0) => {
     mesh.position.set(x, y, z);
     mesh.castShadow = true;
@@ -3318,10 +3320,11 @@ function createEnemyMesh(type, def) {
   }
 
   const glow = new THREE.Sprite(new THREE.SpriteMaterial({
-    map: EG.glowSprite, color: def.color, transparent: true, opacity: 0.2,
+    map: EG.glowSprite, color: def.color, transparent: true, opacity: useTouchUI ? 0.32 : 0.2,
     blending: THREE.AdditiveBlending, depthWrite: false,
   }));
-  glow.scale.set(def.glow, def.glow, 1);
+  const glowScale = useTouchUI ? 1.18 : 1;
+  glow.scale.set(def.glow * glowScale, def.glow * glowScale, 1);
   glow.position.y = type === "slime" ? 0.55 : type === "dragon" ? 0 : 1.0;
   group.add(glow);
 
@@ -3338,7 +3341,7 @@ function spawnEnemy(type, x, z, opts = {}) {
   let hpBase = def.hpb;
   if (type === "golemBoss") hpBase = 340 + wave * 30;
   if (type === "dragon") hpBase = 400 + wave * 32;
-  const baseScale = piece.parts.baseScale || 1;
+  const baseScale = (piece.parts.baseScale || 1) * (useTouchUI && !isBossType(type) ? 1.12 : 1);
 
   const e = {
     type, def,
@@ -3371,7 +3374,7 @@ function spawnEnemy(type, x, z, opts = {}) {
     pending: 0,
     wind: 0,
     flash: 0,
-    baseEmissive: type === "dragon" ? 0.5 : 0.55,
+    baseEmissive: piece.coreMat.emissiveIntensity || (type === "dragon" ? 0.5 : 0.55),
     dead: false,
     walk: rand(0, TAU),
   };
@@ -4392,6 +4395,20 @@ function buildWaveQueue(wave) {
 }
 
 function pickSpawnPos(minDist = 14) {
+  if (useTouchUI && minDist < 20) {
+    const rMin = Math.max(10, minDist);
+    for (let tries = 0; tries < 24; tries++) {
+      const a = -Math.PI / 2 + rand(-0.65, 0.65);
+      const r = rand(rMin, rMin + 5);
+      const x = clamp(player.pos.x + Math.cos(a) * r, -33, 33);
+      const z = clamp(player.pos.z + Math.sin(a) * r, -33, 33);
+      const dist = Math.hypot(x - player.pos.x, z - player.pos.z);
+      if (dist < 10) continue;
+      if (pillars.some((p) => Math.hypot(x - p.x, z - p.z) < p.r + 3)) continue;
+      return { x, z };
+    }
+    return { x: clamp(player.pos.x, -28, 28), z: clamp(player.pos.z - 14, -33, 33) };
+  }
   for (let tries = 0; tries < 24; tries++) {
     const a = rand(0, TAU);
     const r = rand(21, 30.5);
@@ -4892,6 +4909,9 @@ function updateCamera(dt, t) {
     const a = t * 0.1;
     camDesired.set(Math.cos(a) * 37, 26, Math.sin(a) * 37);
     camTargetLook.set(0, 2.4, 0);
+  } else if (useTouchUI && innerHeight > innerWidth) {
+    camDesired.set(player.pos.x, 13.5, player.pos.z + 12.5);
+    camTargetLook.set(player.pos.x, 1.5, player.pos.z - 10);
   } else {
     camDesired.set(player.pos.x, 22, player.pos.z + 19);
     camTargetLook.set(player.pos.x, 1.6, player.pos.z - 2.2);
