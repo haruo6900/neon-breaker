@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#160b33"/>
+      <stop offset="1" stop-color="#04020b"/>
+    </linearGradient>
+    <linearGradient id="sun" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff3c4"/>
+      <stop offset=".48" stop-color="#ffb15c"/>
+      <stop offset="1" stop-color="#ff3d9a"/>
+    </linearGradient>
+    <linearGradient id="bolt" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#eaffff"/>
+      <stop offset=".5" stop-color="#5df3ff"/>
+      <stop offset="1" stop-color="#1d9bb5"/>
+    </linearGradient>
+    <linearGradient id="road" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1a0f36"/>
+      <stop offset="1" stop-color="#05030d"/>
+    </linearGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="9" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="110" fill="url(#bg)"/>
+  <circle cx="256" cy="236" r="128" fill="url(#sun)" opacity=".92"/>
+  <g fill="#06030f" opacity=".92">
+    <rect x="0" y="240" width="512" height="7"/>
+    <rect x="0" y="266" width="512" height="9"/>
+    <rect x="0" y="296" width="512" height="11"/>
+    <rect x="0" y="330" width="512" height="14"/>
+  </g>
+  <circle cx="256" cy="236" r="128" fill="none" stroke="#ff8ec4" stroke-width="3" opacity=".55"/>
+  <path d="M168 512 L232 302 L280 302 L344 512 Z" fill="url(#road)"/>
+  <path d="M232 302 L224 512" stroke="#5df3ff" stroke-width="9" opacity=".85" filter="url(#glow)"/>
+  <path d="M280 302 L288 512" stroke="#ff3d9a" stroke-width="9" opacity=".85" filter="url(#glow)"/>
+  <path d="M256 336 V366 M256 392 V422 M256 448 V478" stroke="#ffd166" stroke-width="9" opacity=".9"/>
+  <path d="M300 44 L192 246 h64 l-26 132 134-198h-72z" fill="url(#bolt)" stroke="#ffffff" stroke-width="5" stroke-linejoin="round" filter="url(#glow)"/>
+</svg>

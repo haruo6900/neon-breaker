@@ -1,0 +1,38 @@
+{
+  "name": "NEON RUSH ～残響ハイウェイ～",
+  "short_name": "NEON RUSH",
+  "description": "ネオンの高速道路を駆け抜ける3Dエンドレスランナー。障害物スレスレの走りでブーストを溜め、どこまで走れるかを競います。",
+  "lang": "ja",
+  "start_url": "./rush.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#04020b",
+  "theme_color": "#04020b",
+  "icons": [
+    {
+      "src": "./rush-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "./rush-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./rush-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./rush-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
