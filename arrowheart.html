@@ -655,39 +655,24 @@
 
   #mobile{position:absolute;inset:0;z-index:6;display:none;pointer-events:none}
   body.touch.playing #mobile{display:block}
+  #floatStick{
+    position:fixed;width:130px;height:130px;margin:-65px 0 0 -65px;border-radius:50%;
+    border:1px solid rgba(233,196,106,.4);
+    background:radial-gradient(circle at 50% 50%,rgba(233,196,106,.14),rgba(4,8,15,.08) 68%);
+    box-shadow:0 0 28px rgba(233,196,106,.16),inset 0 0 24px rgba(233,196,106,.06);
+    display:none;pointer-events:none;z-index:6;
+  }
+  #floatStick.on{display:block}
+  #floatStick .knob{
+    position:absolute;left:50%;top:50%;width:56px;height:56px;margin:-28px 0 0 -28px;border-radius:50%;
+    border:1px solid rgba(255,246,220,.8);
+    background:radial-gradient(circle at 40% 35%,rgba(255,246,220,.5),rgba(233,196,106,.16));
+    box-shadow:0 0 24px rgba(233,196,106,.3);
+  }
+  body.touch .meter.od,body.touch .subline,body.touch #combo{display:none!important}
   body.aim{cursor:none}
   body.aim button{cursor:pointer}
   body.auto #crosshair{opacity:0!important}
-  .stick{
-    position:absolute;width:132px;height:132px;border-radius:50%;
-    border:1px solid rgba(233,196,106,.22);background:radial-gradient(circle at 50% 50%,rgba(233,196,106,.08),rgba(5,10,6,.2) 70%);
-    pointer-events:auto;touch-action:none;
-  }
-  .stick .knob{
-    position:absolute;left:50%;top:50%;width:56px;height:56px;margin:-28px 0 0 -28px;border-radius:50%;
-    border:1px solid rgba(255,236,190,.65);background:radial-gradient(circle at 40% 35%,rgba(255,236,190,.4),rgba(233,196,106,.12));
-    box-shadow:0 0 22px rgba(233,196,106,.25);
-  }
-  .stick .cap{position:absolute;left:0;right:0;bottom:-17px;text-align:center;font-size:8px;letter-spacing:.26em;color:var(--muted);font-weight:700}
-  #stickMove{left:calc(16px + var(--safe-l));bottom:calc(18px + var(--safe-b))}
-  #stickAim{right:calc(16px + var(--safe-r));bottom:calc(18px + var(--safe-b));border-color:rgba(110,231,168,.3);background:radial-gradient(circle at 50% 50%,rgba(110,231,168,.1),rgba(5,10,6,.2) 70%)}
-  #stickAim .knob{border-color:rgba(160,240,190,.7);background:radial-gradient(circle at 40% 35%,rgba(160,240,190,.42),rgba(110,231,168,.14));box-shadow:0 0 22px rgba(110,231,168,.28)}
-  .action{
-    position:absolute;pointer-events:auto;border-radius:50%;display:grid;place-items:center;text-align:center;
-    font-family:"Bebas Neue",sans-serif;letter-spacing:.08em;color:#f6efdc;
-    border:1px solid rgba(233,196,106,.35);background:radial-gradient(circle at 50% 38%,rgba(233,196,106,.2),rgba(5,10,6,.55));
-    box-shadow:0 0 22px rgba(233,196,106,.1);touch-action:none;
-  }
-  .action:active{filter:brightness(1.6)}
-  #btnDash{width:76px;height:76px;right:calc(162px + var(--safe-r));bottom:calc(30px + var(--safe-b));font-size:18px}
-  #btnOd{
-    width:70px;height:70px;right:calc(38px + var(--safe-r));bottom:calc(168px + var(--safe-b));font-size:13px;line-height:.95;
-    border-color:rgba(110,231,168,.45);background:radial-gradient(circle at 50% 38%,rgba(110,231,168,.22),rgba(5,10,6,.55));
-    color:#e6f9df;
-  }
-  #btnOd.ready{animation:odReady .6s infinite alternate;border-color:var(--pink);box-shadow:0 0 30px rgba(110,231,168,.4)}
-  #btnDash.cool{opacity:.38}
-
   /* ---------- boot ---------- */
   #boot{
     position:fixed;inset:0;z-index:20;background:#070b08;display:grid;place-items:center;
@@ -809,10 +794,7 @@
   </div>
 
   <div id="mobile">
-    <div class="stick" id="stickMove"><div class="knob"></div><span class="cap">MOVE</span></div>
-    <div class="stick" id="stickAim"><div class="knob"></div><span class="cap">AIM / FIRE</span></div>
-    <button class="action" id="btnDash" type="button">DASH</button>
-    <button class="action" id="btnOd" type="button">FOCUS</button>
+    <div id="floatStick"><div class="knob" id="floatKnob"></div></div>
   </div>
 
   <section class="screen on" id="screenTitle">
@@ -830,7 +812,7 @@
         <h3>HOW TO HUNT</h3>
         <dl>
           <dt>PC</dt><dd><b>WASD</b> 移動 / <b>マウス</b> 照準 / <b>左クリック</b> 射撃 / <b>Space</b> 回避 / <b>E</b> 集中 / <b>P</b> ポーズ</dd>
-          <dt>スマホ</dt><dd>左スティックで移動。右スティックで照準＆射撃。止まっている間は近くの魔物へ自動で射撃します。</dd>
+          <dt>スマホ</dt><dd>画面の触った場所に移動スティックが出現。ドラッグで移動し、指を離すと消えます。止まっている間は近くの魔物へ自動で射撃します（フォーカス・エイム・コンボ・ダッシュはありません）。</dd>
           <dt>成長</dt><dd>魔物を倒すと<b>経験値の珠</b>が落ちます。回収してレベルアップすると、ランダムな3択の祝福を1つ獲得。弓は短弓 → 長弓 → 精霊の弓 → 竜骨の弓へ進化します。</dd>
           <dt>装備</dt><dd>装備は<b>星晶ガチャ</b>で獲得。星晶はステージクリアとボス撃破で貯まります。コインで装備をLv5まで強化でき、セット効果もあります。</dd>
         </dl>
@@ -1113,10 +1095,8 @@ const dom = {
   ovNew: $("#ovNew"),
   titleFoot: $("#titleFoot"),
   mobile: $("#mobile"),
-  btnDash: $("#btnDash"),
-  btnOd: $("#btnOd"),
-  stickMove: $("#stickMove"),
-  stickAim: $("#stickAim"),
+  floatStick: $("#floatStick"),
+  floatKnob: $("#floatKnob"),
 };
 
 /* --------------------------- save --------------------------- */
@@ -1607,6 +1587,10 @@ const input = {
 };
 let aimPoint = null;
 let aimDir = null;
+let floatPointer = null;
+let floatOriginX = 0;
+let floatOriginY = 0;
+const FLOAT_RADIUS = 54;
 
 let camPos = null;
 let camLook = null;
@@ -4098,9 +4082,11 @@ function killEnemy(e, byPlayer) {
 
   if (byPlayer) {
     game.totalKills++;
-    game.combo++;
-    game.comboTimer = 3.2;
-    updateComboUI();
+    if (!useTouchUI) {
+      game.combo++;
+      game.comboTimer = 3.2;
+      updateComboUI();
+    }
     addScore(e.score, e.pos.x, e.pos.y + 1.6, e.pos.z, isBossType(e.type) ? "gold" : "");
     gainOD((isBossType(e.type) ? 40 : e.type === "golem" ? 12 : 6) * player.up.focusGain);
     if (player.up.lifesteal > 0) {
@@ -4300,7 +4286,7 @@ function makeBowCard() {
 }
 
 function buildUpgradeChoices() {
-  const pool = UPGRADE_DEFS.filter((def) => (player.up.counts[def.id] || 0) < def.max);
+  const pool = UPGRADE_DEFS.filter((def) => (player.up.counts[def.id] || 0) < def.max && !(useTouchUI && (def.id === "dash" || def.id === "focus")));
   const choices = [];
   const bowLevels = [2, 5, 8];
   if (player.bowTier < 3 && player.level >= bowLevels[player.bowTier]) {
@@ -4337,6 +4323,7 @@ function buildUpgradeChoices() {
 
 function triggerLevelUp() {
   if (state !== "playing" || !player.alive) return;
+  endFloatStick();
   state = "levelup";
   player.xp -= player.xpNext;
   player.level++;
@@ -4457,11 +4444,11 @@ function addScore(base, x, y, z, cls) {
 }
 
 function comboMult() {
-  return 1 + Math.min(game.combo, 30) * 0.08;
+  return useTouchUI ? 1 : 1 + Math.min(game.combo, 30) * 0.08;
 }
 
 function gainOD(v) {
-  if (game.odActive) return;
+  if (useTouchUI || game.odActive) return;
   game.od = clamp(game.od + v, 0, 100);
 }
 
@@ -4491,6 +4478,7 @@ function hurtPlayer(amount, sx, sz) {
 
 function playerDie() {
   if (!player.alive) return;
+  endFloatStick();
   player.alive = false;
   player.hp = 0;
   player.rig.visible = false;
@@ -4530,6 +4518,7 @@ function finishStage() {
 }
 
 function showResults(cleared, bonus, unlocked, gems) {
+  endFloatStick();
   state = "over";
   game.odActive = false;
   dom.odfx.classList.remove("on");
@@ -4781,6 +4770,7 @@ function updatePlayer(dt, t) {
 }
 
 function tryDash() {
+  if (useTouchUI) return;
   if (state !== "playing" || !player.alive || player.dashCd > 0 || player.dashTime > 0) return;
   const mv = getMoveDir();
   let dx = mv.x, dz = mv.z;
@@ -4809,6 +4799,7 @@ function tryDash() {
 }
 
 function tryFocus() {
+  if (useTouchUI) return;
   if (state !== "playing" || !player.alive || game.odActive || game.od < 99.5) return;
   game.odActive = true;
   game.odTime = 8;
@@ -5007,6 +4998,10 @@ function updateTitleScene(dt, t) {
    HUD
    ============================================================ */
 function updateComboUI() {
+  if (useTouchUI) {
+    dom.combo.classList.remove("on");
+    return;
+  }
   const on = game.combo > 0 && game.comboTimer > 0;
   dom.combo.classList.toggle("on", on);
   dom.comboNum.textContent = comboMult().toFixed(1);
@@ -5023,18 +5018,15 @@ function updateHud(dt) {
   dom.odPct.textContent = Math.round(game.od) + "%";
   const odReady = game.od >= 99.5 && !game.odActive;
   dom.odMeter.classList.toggle("ready", odReady);
-  dom.btnOd.classList.toggle("ready", odReady);
   dom.odfx.classList.toggle("on", game.odActive);
   updateXpUI();
 
   if (player.dashCd > 0) {
     dom.dashTag.textContent = "DASH " + player.dashCd.toFixed(1) + "s";
     dom.dashTag.className = "dash-cool";
-    dom.btnDash.classList.add("cool");
   } else {
     dom.dashTag.textContent = "DASH READY";
     dom.dashTag.className = "dash-ready";
-    dom.btnDash.classList.remove("cool");
   }
 
   if (game.comboTimer > 0) {
@@ -5083,11 +5075,8 @@ function updateHud(dt) {
 const useTouchUI = !!(window.matchMedia && window.matchMedia("(pointer: coarse)").matches);
 const HINT_DESKTOP = dom.hint.innerHTML;
 const HINT_TOUCH = [
-  '<span><b>左スティック</b> 移動</span>',
-  '<span><b>右スティック</b> 照準 + 射撃</span>',
+  '<span><b>画面タッチ</b> で移動スティック</span>',
   '<span><b>止まると自動射撃</b></span>',
-  '<span><b>DASH</b> 回避</span>',
-  '<span><b>FOCUS</b> 集中</span>',
 ].join("");
 
 function banner(title, sub, kicker, dur) {
@@ -5191,7 +5180,6 @@ function resetRun() {
   dom.odFill.style.width = "0%";
   dom.odPct.textContent = "0%";
   dom.odMeter.classList.remove("ready");
-  dom.btnOd.classList.remove("ready");
   dom.odfx.classList.remove("on");
   dom.hurt.style.opacity = "0";
   dom.enemyNum.textContent = "0";
@@ -5206,6 +5194,7 @@ function resetRun() {
 }
 
 function startStage(index) {
+  endFloatStick();
   const stage = STAGES[clamp(Number(index) || 0, 0, STAGES.length - 1)];
   game.stage = stage.id;
   audio.init();
@@ -5246,6 +5235,7 @@ function startGame() {
 }
 
 function quitToTitle() {
+  endFloatStick();
   state = "title";
   clearRun();
   game.phase = "idle";
@@ -5529,6 +5519,7 @@ function renderGear() {
 }
 
 function openGear(from) {
+  endFloatStick();
   gearReturn = from || "title";
   audio.init();
   state = "gear";
@@ -5620,6 +5611,7 @@ function pullGacha(count) {
   showGachaResults(results);
 }
 function openGacha(from) {
+  endFloatStick();
   gachaReturn = from || "title";
   audio.init();
   state = "gacha";
@@ -5677,6 +5669,7 @@ function renderStageSelect() {
   updateCoinUI();
 }
 function openStageSelect() {
+  endFloatStick();
   state = "stageSelect";
   clearRun();
   game.phase = "idle";
@@ -5711,6 +5704,7 @@ function toggleMute() {
 
 function pauseGame() {
   if (state !== "playing") return;
+  endFloatStick();
   state = "paused";
   dom.screenPause.classList.add("on");
   document.body.classList.remove("aim", "auto");
@@ -5737,45 +5731,33 @@ function togglePause() {
 /* ============================================================
    INPUT
    ============================================================ */
-function setupStick(el, onMove, onEnd) {
-  const knob = el.querySelector(".knob");
-  let pid = null;
-  let cx = 0, cy = 0;
-  const R = 50;
-  const apply = (e) => {
-    let dx = e.clientX - cx;
-    let dy = e.clientY - cy;
-    const l = Math.hypot(dx, dy);
-    const k = Math.min(1, l / R);
-    if (l > 0.001) { dx /= l; dy /= l; }
-    else { dx = 0; dy = 0; }
-    knob.style.transform = `translate(${dx * k * R}px,${dy * k * R}px)`;
-    onMove(dx * k, dy * k);
-  };
-  el.addEventListener("pointerdown", (e) => {
-    if (pid !== null) return;
-    pid = e.pointerId;
-    try { el.setPointerCapture(pid); } catch (err) { /* ignore */ }
-    const r = el.getBoundingClientRect();
-    cx = r.left + r.width / 2;
-    cy = r.top + r.height / 2;
-    apply(e);
-    e.preventDefault();
-  });
-  el.addEventListener("pointermove", (e) => {
-    if (e.pointerId !== pid) return;
-    apply(e);
-    e.preventDefault();
-  });
-  const end = (e) => {
-    if (e.pointerId !== pid) return;
-    pid = null;
-    knob.style.transform = "";
-    onEnd();
-  };
-  el.addEventListener("pointerup", end);
-  el.addEventListener("pointercancel", end);
-  el.addEventListener("lostpointercapture", end);
+function showFloatStick(x, y) {
+  floatOriginX = x;
+  floatOriginY = y;
+  input.moveVec.x = 0;
+  input.moveVec.y = 0;
+  dom.floatStick.style.left = x + "px";
+  dom.floatStick.style.top = y + "px";
+  dom.floatKnob.style.transform = "translate(0px, 0px)";
+  dom.floatStick.classList.add("on");
+}
+function updateFloatStick(x, y) {
+  const dx = x - floatOriginX;
+  const dy = y - floatOriginY;
+  const len = Math.hypot(dx, dy);
+  const k = Math.min(1, len / FLOAT_RADIUS);
+  const nx = len > 0 ? dx / len : 0;
+  const ny = len > 0 ? dy / len : 0;
+  dom.floatKnob.style.transform = `translate(${nx * k * FLOAT_RADIUS}px, ${ny * k * FLOAT_RADIUS}px)`;
+  input.moveVec.x = nx * k;
+  input.moveVec.y = ny * k;
+}
+function endFloatStick() {
+  floatPointer = null;
+  input.moveVec.x = 0;
+  input.moveVec.y = 0;
+  if (dom.floatStick) dom.floatStick.classList.remove("on");
+  if (dom.floatKnob) dom.floatKnob.style.transform = "";
 }
 
 function setupInput() {
@@ -5809,6 +5791,7 @@ function setupInput() {
   addEventListener("blur", () => {
     input.keys.clear();
     input.mouseDown = false;
+    endFloatStick();
     if (state === "playing") pauseGame();
   });
   addEventListener("mousemove", (e) => {
@@ -5818,7 +5801,33 @@ function setupInput() {
     dom.crosshair.style.top = e.clientY + "px";
   });
   const canvas = renderer.domElement;
+  canvas.addEventListener("pointerdown", (e) => {
+    if (useTouchUI && e.pointerType !== "mouse") {
+      if (state !== "playing" || floatPointer !== null) return;
+      floatPointer = e.pointerId;
+      showFloatStick(e.clientX, e.clientY);
+      try { canvas.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+      e.preventDefault();
+      return;
+    }
+    if (useTouchUI) return;
+    if (e.button === 0) input.mouseDown = true;
+    if (state === "playing") e.preventDefault();
+  });
+  canvas.addEventListener("pointermove", (e) => {
+    if (e.pointerId !== floatPointer) return;
+    updateFloatStick(e.clientX, e.clientY);
+    e.preventDefault();
+  });
+  const endFloatPointer = (e) => {
+    if (e.pointerId !== floatPointer) return;
+    endFloatStick();
+  };
+  canvas.addEventListener("pointerup", endFloatPointer);
+  canvas.addEventListener("pointercancel", endFloatPointer);
+  canvas.addEventListener("lostpointercapture", endFloatPointer);
   canvas.addEventListener("mousedown", (e) => {
+    if (useTouchUI) return;
     if (e.button === 0) input.mouseDown = true;
     if (state === "playing") e.preventDefault();
   });
@@ -5834,25 +5843,6 @@ function setupInput() {
       audio.ctx.resume();
     }
   });
-
-  setupStick(dom.stickMove,
-    (x, y) => { input.moveVec.x = x; input.moveVec.y = y; },
-    () => { input.moveVec.x = 0; input.moveVec.y = 0; }
-  );
-  setupStick(dom.stickAim,
-    (x, y) => {
-      input.aimVec.x = x;
-      input.aimVec.y = y;
-      input.aimVec.active = Math.hypot(x, y) > 0.2;
-    },
-    () => {
-      input.aimVec.active = false;
-      input.aimVec.x = 0;
-      input.aimVec.y = 0;
-    }
-  );
-  dom.btnDash.addEventListener("pointerdown", (e) => { e.preventDefault(); tryDash(); });
-  dom.btnOd.addEventListener("pointerdown", (e) => { e.preventDefault(); tryFocus(); });
 }
 
 function setupUI() {
