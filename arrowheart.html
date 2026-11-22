@@ -334,7 +334,7 @@
   .cards.spinning .slot-roll{display:block}
   .slot-strip{
     position:absolute;left:50%;top:0;width:100%;transform:translateX(-50%);
-    animation:slotRoll 1.15s cubic-bezier(.08,.72,.16,1) both;
+    animation:slotRoll var(--spin,1.15s) cubic-bezier(.08,.72,.16,1) both;
   }
   .slot-strip span{display:grid;place-items:center;height:64px;opacity:.95;border-bottom:1px solid rgba(255,255,255,.1)}
   .slot-strip span:nth-child(even){opacity:.46}
@@ -348,10 +348,11 @@
     background:linear-gradient(180deg,rgba(7,16,10,.82),transparent 8% 92%,rgba(7,16,10,.82));
   }
   @keyframes slotRoll{0%{transform:translate(-50%,0)}100%{transform:translate(-50%,-704px)}}
-  .cards.spinning .card{filter:blur(.55px);animation:slotShake .16s linear infinite}
+  .cards.spinning .card:not(.stopped){filter:blur(.55px);animation:slotShake .16s linear infinite}
+  .cards.spinning .card.stopped{animation:slotStopBounce .2s var(--ease)}
+  .cards.spinning .card.stopped .slot-roll{display:none}
   @keyframes slotShake{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
-  .cards.revealed .card{animation:slotLand .24s var(--ease)}
-  @keyframes slotLand{from{transform:translateY(-5px) scale(.985)}to{transform:none}}
+  @keyframes slotStopBounce{0%{transform:translateY(-6px)}60%{transform:translateY(2px)}100%{transform:none}}
   .level-tip{font-size:9.5px;letter-spacing:.24em;color:var(--muted-2);margin-top:18px;font-weight:700}
 
   /* catchier blessing cards */
@@ -1215,6 +1216,14 @@ class SoundEngine {
     if (!this.enabled) return;
     this.blip("sawtooth", 210, 66, 0.33, 0.13, null, 900);
     this.noise(0.24, 0.14, 700);
+  }
+  sfxSlotStop(step = 0) {
+    if (!this.enabled) return;
+    const t = this.ctx ? this.ctx.currentTime : 0;
+    const base = [112, 132, 154][step] || 130;
+    this.blip("sine", base * 2.2, base, 0.17, 0.15, t, 1200);
+    this.blip("triangle", base * 3.4, base * 1.25, 0.07, 0.08, t, 2400);
+    this.noise(0.055, 0.05, 1900, t, "highpass");
   }
   sfxPickup() {
     if (!this.enabled) return;
@@ -4147,7 +4156,7 @@ function updateXpUI() {
 
 let activeChoices = [];
 let slotRolling = false;
-let slotTimer = null;
+let slotTimers = [];
 let gearReturn = "title";
 let gachaReturn = "title";
 const NUMERALS = ["1", "2", "3"];
@@ -4198,23 +4207,12 @@ function upgradeArtSVG(card, spin) {
   return '<svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="29" fill="'+col+'" fill-opacity=".07" stroke="'+col+'" stroke-opacity=".32"/><circle cx="32" cy="32" r="24" fill="none" stroke="'+col+'" stroke-opacity=".12"/><g fill="none" stroke="'+col+'" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">'+icon+'</g></svg>';
 }
 
-function slotStripHTML(card) {
-  let html = '<div class="slot-roll" aria-hidden="true"><div class="slot-strip">';
+function slotStripHTML(card, spinMs) {
+  let html = '<div class="slot-roll" style="--spin:' + spinMs + 'ms" aria-hidden="true"><div class="slot-strip">';
   for (let i = 0; i < 12; i++) {
     html += '<span>' + upgradeArtSVG(card) + '</span>';
   }
   return html + '</div></div>';
-}
-
-function finishSlot() {
-  if (!slotRolling) return;
-  slotRolling = false;
-  clearTimeout(slotTimer);
-  slotTimer = null;
-  dom.upgradeCards.classList.remove("spinning");
-  dom.upgradeCards.classList.add("revealed");
-  if (dom.levelTip) dom.levelTip.textContent = "1 / 2 / 3 キーでも選択できます";
-  audio.blip("sine", 420, 840, 0.18, 0.04);
 }
 
 function buildUpgradeChoices() {
@@ -4236,7 +4234,8 @@ function buildUpgradeChoices() {
     if (++extra > 3) break;
   }
   activeChoices = choices.slice(0, 3);
-  const strips = activeChoices.map((c) => slotStripHTML(c));
+  const spinMs = [1180, 980, 780];
+  const strips = activeChoices.map((c, i) => slotStripHTML(c, spinMs[i]));
   dom.upgradeCards.innerHTML = activeChoices.map((c, i) => `
     <button class="card ${c.rarity}" type="button" data-index="${i}" style="animation-delay:${i * 60}ms">
       ${strips[i]}
@@ -4253,8 +4252,23 @@ function buildUpgradeChoices() {
   dom.upgradeCards.classList.add("spinning");
   if (dom.levelTip) dom.levelTip.textContent = "回転中…";
   slotRolling = true;
-  clearTimeout(slotTimer);
-  slotTimer = setTimeout(finishSlot, 1200);
+  slotTimers.forEach((t) => clearTimeout(t));
+  slotTimers = [];
+  let stopped = 0;
+  spinMs.forEach((ms, i) => {
+    slotTimers.push(setTimeout(() => {
+      const card = dom.upgradeCards.querySelector('.card[data-index="' + i + '"]');
+      if (card) card.classList.add("stopped");
+      audio.sfxSlotStop(i);
+      stopped++;
+      if (stopped >= 3) {
+        slotRolling = false;
+        dom.upgradeCards.classList.remove("spinning");
+        dom.upgradeCards.classList.add("revealed");
+        if (dom.levelTip) dom.levelTip.textContent = "1 / 2 / 3 キーでも選択できます";
+      }
+    }, ms + 20));
+  });
   dom.upgradeCards.querySelectorAll(".card").forEach((btn) => {
     btn.addEventListener("click", () => {
       if (slotRolling) return;
@@ -4892,8 +4906,8 @@ function clearRun() {
   xpOrbs = [];
   activeChoices = [];
   slotRolling = false;
-  clearTimeout(slotTimer);
-  slotTimer = null;
+  slotTimers.forEach((t) => clearTimeout(t));
+  slotTimers = [];
   dom.upgradeCards.classList.remove("spinning", "revealed");
   dom.upgradeCards.innerHTML = "";
   dom.screenLevel.classList.remove("on");
