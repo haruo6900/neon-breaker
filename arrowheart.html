@@ -336,8 +336,9 @@
     position:absolute;left:50%;top:0;width:100%;transform:translateX(-50%);
     animation:slotRoll 1.15s cubic-bezier(.08,.72,.16,1) both;
   }
-  .slot-strip span{display:grid;place-items:center;height:64px;opacity:1}
-  .slot-strip svg{width:44px;height:44px;display:block;filter:drop-shadow(0 0 10px rgba(255,230,163,.9))}
+  .slot-strip span{display:grid;place-items:center;height:64px;opacity:.95;border-bottom:1px solid rgba(255,255,255,.1)}
+  .slot-strip span:nth-child(even){opacity:.46}
+  .slot-strip svg{width:46px;height:46px;display:block;filter:drop-shadow(0 0 9px currentColor) brightness(1.18)}
   .slot-roll::before{
     content:"";position:absolute;left:8%;right:8%;top:50%;height:2px;z-index:3;pointer-events:none;
     background:var(--rc,#ffd66a);box-shadow:0 0 12px var(--rc,#ffd66a);opacity:.65;
@@ -4197,12 +4198,10 @@ function upgradeArtSVG(card, spin) {
   return '<svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="29" fill="'+col+'" fill-opacity=".07" stroke="'+col+'" stroke-opacity=".32"/><circle cx="32" cy="32" r="24" fill="none" stroke="'+col+'" stroke-opacity=".12"/><g fill="none" stroke="'+col+'" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">'+icon+'</g></svg>';
 }
 
-function slotStripHTML() {
-  const ids = ["power","haste","swift","vitality","crit","lifesteal","multishot","pierce","homing","bow"];
-  const rarities = ["uncommon","rare","epic","legendary"];
+function slotStripHTML(card) {
   let html = '<div class="slot-roll" aria-hidden="true"><div class="slot-strip">';
   for (let i = 0; i < 12; i++) {
-    html += '<span>' + upgradeArtSVG({ id: pick(ids), rarity: pick(rarities) }, true) + '</span>';
+    html += '<span>' + upgradeArtSVG(card) + '</span>';
   }
   return html + '</div></div>';
 }
@@ -4237,7 +4236,7 @@ function buildUpgradeChoices() {
     if (++extra > 3) break;
   }
   activeChoices = choices.slice(0, 3);
-  const strips = activeChoices.map(() => slotStripHTML());
+  const strips = activeChoices.map((c) => slotStripHTML(c));
   dom.upgradeCards.innerHTML = activeChoices.map((c, i) => `
     <button class="card ${c.rarity}" type="button" data-index="${i}" style="animation-delay:${i * 60}ms">
       ${strips[i]}
