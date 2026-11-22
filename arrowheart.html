@@ -144,8 +144,6 @@
   @keyframes odReady{from{filter:brightness(1)}to{filter:brightness(1.85)}}
   .subline{display:flex;align-items:center;justify-content:space-between;margin-top:7px;font-size:9px;letter-spacing:.2em;color:var(--muted);font-weight:700}
   .subline b{color:var(--cyan);font-family:"Bebas Neue",sans-serif;font-size:13px;letter-spacing:.1em}
-  .subline .dash-ready{color:var(--lime)}
-  .subline .dash-cool{color:var(--muted-2)}
 
   .hud-center{position:absolute;top:calc(14px + var(--safe-t));left:50%;transform:translateX(-50%);text-align:center;min-width:240px}
   .wave-chip{display:inline-flex;align-items:baseline;gap:8px;padding:4px 16px;border:1px solid var(--line);background:rgba(8,14,10,.66);clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)}
@@ -703,7 +701,6 @@
     .hud-center{top:calc(112px + var(--safe-t));min-width:200px}
     .boss-bar{top:calc(166px + var(--safe-t));width:min(560px,84vw)}
     .stage-tag{display:none}
-    #dashTag{display:none}
     .score-box b{font-size:32px}
     .hud-right .best-mini{display:none}
     .wave-chip b{font-size:21px}
@@ -749,7 +746,6 @@
       <div class="subline">
         <span>FOCUS <b id="odPct">0%</b></span>
         <span id="xpText">0 / 6 XP</span>
-        <span id="dashTag" class="dash-ready">DASH READY</span>
       </div>
     </div>
 
@@ -790,7 +786,6 @@
     <span><b>MOUSE</b> 照準</span>
     <span><b>CLICK</b> 射撃</span>
     <span><b>止まると自動射撃</b></span>
-    <span><b>SPACE</b> 回避</span>
     <span><b>E</b> 集中</span>
   </div>
 
@@ -812,8 +807,8 @@
       <div class="howto" id="howPanel">
         <h3>HOW TO HUNT</h3>
         <dl>
-          <dt>PC</dt><dd><b>WASD</b> 移動 / <b>マウス</b> 照準 / <b>左クリック</b> 射撃 / <b>Space</b> 回避 / <b>E</b> 集中 / <b>P</b> ポーズ</dd>
-          <dt>スマホ</dt><dd>画面の触った場所に移動スティックが出現。ドラッグで移動し、指を離すと消えます。止まっている間は近くの魔物へ自動で射撃します（フォーカス・エイム・コンボ・ダッシュはありません）。</dd>
+          <dt>PC</dt><dd><b>WASD</b> 移動 / <b>マウス</b> 照準 / <b>左クリック</b> 射撃 / <b>E</b> 集中 / <b>P</b> ポーズ</dd>
+          <dt>スマホ</dt><dd>画面の触った場所に移動スティックが出現。ドラッグで移動し、指を離すと消えます。止まっている間は近くの魔物へ自動で射撃します（フォーカス・エイム・コンボはありません）。</dd>
           <dt>成長</dt><dd>魔物を倒すと<b>経験値の珠</b>が落ちます。回収してレベルアップすると、ランダムな3択の祝福を1つ獲得。弓は短弓 → 長弓 → 精霊の弓 → 竜骨の弓へ進化します。</dd>
           <dt>装備</dt><dd>装備は<b>星晶ガチャ</b>で獲得。星晶はステージクリアとボス撃破で貯まります。コインで装備をLv5まで強化でき、セット効果もあります。</dd>
         </dl>
@@ -1011,7 +1006,6 @@ const dom = {
   odFill: $("#odFill"),
   odMeter: $("#odMeter"),
   odPct: $("#odPct"),
-  dashTag: $("#dashTag"),
   waveNum: $("#waveNum"),
   enemyNum: $("#enemyNum"),
   scoreNum: $("#scoreNum"),
@@ -1250,11 +1244,6 @@ class SoundEngine {
     this.blip("sawtooth", 210, 66, 0.33, 0.13, null, 900);
     this.noise(0.24, 0.14, 700);
   }
-  sfxDash() {
-    if (!this.enabled) return;
-    this.blip("sine", 260, 880, 0.15, 0.06);
-    this.noise(0.13, 0.05, 2600, null, "highpass");
-  }
   sfxPickup() {
     if (!this.enabled) return;
     const t = this.ctx ? this.ctx.currentTime : 0;
@@ -1440,11 +1429,6 @@ const UPGRADE_DEFS = [
     apply() { player.up.crit = Math.min(0.55, player.up.crit + 0.08); },
   },
   {
-    id: "dash", name: "軽業", glyph: "軽", rarity: "common", tag: "MOVE", max: 3,
-    desc: "回避のクールダウンが -15% 短くなる。",
-    apply() { player.up.dashCd *= 0.85; },
-  },
-  {
     id: "focus", name: "集中の理", glyph: "集", rarity: "rare", tag: "SPIRIT", max: 3,
     desc: "集中ゲージの獲得量が +20% 増える。",
     apply() { player.up.focusGain *= 1.2; },
@@ -1524,7 +1508,7 @@ const GEAR = {
   armor: [
     { id: "starter_vest", slot: "armor", name: "旅装のベスト", set: "wanderer", rarity: "N", gacha: false, base: { maxHp: 8 }, desc: "最大HP +8" },
     { id: "leather_vest", slot: "armor", name: "森革のベスト", set: "forest", rarity: "R", gacha: true, base: { maxHp: 22 }, desc: "最大HP +22" },
-    { id: "moon_cloak", slot: "armor", name: "月影の外套", set: "moon", rarity: "SR", gacha: true, base: { speed: 0.06, dashCd: -0.05 }, desc: "移動 +6% / 回避CT -5%" },
+    { id: "moon_cloak", slot: "armor", name: "月影の外套", set: "moon", rarity: "SR", gacha: true, base: { speed: 0.08 }, desc: "移動 +8%" },
     { id: "bone_plate", slot: "armor", name: "竜骨の胸甲", set: "dragon", rarity: "SSR", gacha: true, base: { maxHp: 14, damage: 0.03 }, desc: "最大HP +14 / 攻撃 +3%" },
   ],
   charm: [
@@ -2857,11 +2841,11 @@ function buildPlayer() {
     level: 1, xp: 0, xpNext: xpNextFor(1),
     up: {
       damage: 1, rate: 1, speed: 1, multishot: 0, pierce: 0,
-      homing: false, lifesteal: 0, crit: 0.04, dashCd: 1.45,
+      homing: false, lifesteal: 0, crit: 0.04,
       focusGain: 1, autoDamage: 1, counts: {},
     },
     bowTier: 0,
-    aimAngle: 0, fireCd: 0, dashCd: 0, dashTime: 0, invuln: 0,
+    aimAngle: 0, fireCd: 0, invuln: 0,
     walk: 0, legs, armL, armR, bow, bowMat, stringMat, nock,
     tipL, tipR, tipMat, aura, locator, light: playerLight,
     alive: true, moving: false, autoFire: false, target: null,
@@ -4290,7 +4274,7 @@ function makeBowCard() {
 }
 
 function buildUpgradeChoices() {
-  const pool = UPGRADE_DEFS.filter((def) => (player.up.counts[def.id] || 0) < def.max && !(useTouchUI && (def.id === "dash" || def.id === "focus")));
+  const pool = UPGRADE_DEFS.filter((def) => (player.up.counts[def.id] || 0) < def.max && !(useTouchUI && def.id === "focus"));
   const choices = [];
   const bowLevels = [2, 5, 8];
   if (player.bowTier < 3 && player.level >= bowLevels[player.bowTier]) {
@@ -4651,7 +4635,6 @@ function updateAim() {
 function updatePlayer(dt, t) {
   if (!player.alive) return;
   player.fireCd -= dt;
-  player.dashCd = Math.max(0, player.dashCd - dt);
   player.invuln = Math.max(0, player.invuln - dt);
   if (player.recoil > 0) player.recoil = Math.max(0, player.recoil - dt * 2.4);
 
@@ -4664,18 +4647,9 @@ function updatePlayer(dt, t) {
   const mv = getMoveDir();
   const speed = 7.4 * player.up.speed;
 
-  if (player.dashTime > 0) {
-    player.dashTime -= dt;
-    if (player.dashDir) {
-      player.vel.x = player.dashDir.x * 22;
-      player.vel.z = player.dashDir.z * 22;
-    }
-    if (player.dashTime <= 0) player.dashDir = null;
-  } else {
-    const k = 1 - Math.exp(-11 * dt);
-    player.vel.x = lerp(player.vel.x, mv.x * speed, k);
-    player.vel.z = lerp(player.vel.z, mv.z * speed, k);
-  }
+  const k = 1 - Math.exp(-11 * dt);
+  player.vel.x = lerp(player.vel.x, mv.x * speed, k);
+  player.vel.z = lerp(player.vel.z, mv.z * speed, k);
 
   player.pos.x += player.vel.x * dt;
   player.pos.z += player.vel.z * dt;
@@ -4788,35 +4762,6 @@ function updatePlayer(dt, t) {
   }
 }
 
-function tryDash() {
-  if (useTouchUI) return;
-  if (state !== "playing" || !player.alive || player.dashCd > 0 || player.dashTime > 0) return;
-  const mv = getMoveDir();
-  let dx = mv.x, dz = mv.z;
-  if (Math.hypot(dx, dz) < 0.1) {
-    const aim = updateAim();
-    dx = aim ? aimDir.x : Math.sin(player.group.rotation.y);
-    dz = aim ? aimDir.z : Math.cos(player.group.rotation.y);
-  }
-  const l = Math.hypot(dx, dz) || 1;
-  dx /= l; dz /= l;
-  player.dashCd = player.up.dashCd;
-  player.dashTime = 0.16;
-  player.invuln = Math.max(player.invuln, 0.38);
-  player.dashDir = { x: dx, z: dz };
-  player.vel.set(dx * 22, 0, dz * 22);
-  audio.sfxDash();
-  addShake(0.14);
-  for (let i = 0; i < 10; i++) {
-    spawnParticles(
-      player.pos.x + rand(-0.45, 0.45), rand(0.2, 1.6), player.pos.z + rand(-0.45, 0.45),
-      0x9fffaa, 1, 3, 0.8, 0.32, 2
-    );
-  }
-  shockwave(player.pos.x, player.pos.z, 0.4, 2.2, 0x9fffaa, 0.26);
-  flashAt(player.pos.x, 1.1, player.pos.z, 0xffe6a3, 2.8, 0.14);
-}
-
 function tryFocus() {
   if (useTouchUI) return;
   if (state !== "playing" || !player.alive || game.odActive || game.od < 99.5) return;
@@ -4878,16 +4823,13 @@ function updateWaves(dt) {
     game.breakTimer = 2.9;
     const bonus = 200 + wave * 120;
     addScore(bonus, player.pos.x, 2.4, player.pos.z, "cyan");
-    player.hp = Math.min(player.maxHp, player.hp + 8);
-    banner("WAVE CLEAR", `BONUS +${fmt(bonus)}  //  +${fmt(coinGain)}◈`, "THE FOREST RESTORES YOU", 2.1);
+    banner("WAVE CLEAR", `BONUS +${fmt(bonus)}  //  +${fmt(coinGain)}◈`, "THE HUNT CONTINUES", 2.1);
     audio.sfxPickup();
     beamFlash(player.pos.x, player.pos.z, 0x9fffaa, 0.9, 1.5);
     flashAt(player.pos.x, 1.4, player.pos.z, 0x9fffaa, 5.5, 0.4);
     shockwave(player.pos.x, player.pos.z, 0.5, 5, 0x9fffaa, 0.6);
-    for (let i = 0; i < 2; i++) {
-      const pos = pickSpawnPos(8);
-      spawnPickup(i === 0 ? "hp" : "od", pos.x, pos.z);
-    }
+    const pos = pickSpawnPos(8);
+    spawnPickup("od", pos.x, pos.z);
   }
 }
 
@@ -5043,14 +4985,6 @@ function updateHud(dt) {
   dom.odfx.classList.toggle("on", game.odActive);
   updateXpUI();
 
-  if (player.dashCd > 0) {
-    dom.dashTag.textContent = "DASH " + player.dashCd.toFixed(1) + "s";
-    dom.dashTag.className = "dash-cool";
-  } else {
-    dom.dashTag.textContent = "DASH READY";
-    dom.dashTag.className = "dash-ready";
-  }
-
   if (game.comboTimer > 0) {
     game.comboTimer -= dt;
     if (game.comboTimer <= 0) {
@@ -5170,7 +5104,7 @@ function resetRun() {
   player.bowTier = 0;
   player.up = {
     damage: 1, rate: 1, speed: 1, multishot: 0, pierce: 0,
-    homing: false, lifesteal: 0, crit: 0.04, dashCd: 1.45,
+    homing: false, lifesteal: 0, crit: 0.04,
     focusGain: 1, autoDamage: 1, counts: {},
   };
   player.maxHp = 120;
@@ -5183,9 +5117,6 @@ function resetRun() {
   player.group.rotation.y = 0;
   player.aimAngle = 0;
   player.fireCd = 0;
-  player.dashCd = 0;
-  player.dashTime = 0;
-  player.dashDir = null;
   player.invuln = 1.4;
   player.recoil = 0;
   player.walk = 0;
@@ -5205,8 +5136,6 @@ function resetRun() {
   dom.odfx.classList.remove("on");
   dom.hurt.style.opacity = "0";
   dom.enemyNum.textContent = "0";
-  dom.dashTag.textContent = "DASH READY";
-  dom.dashTag.className = "dash-ready";
   updateXpUI();
   updateMuteUI();
 
@@ -5376,13 +5305,12 @@ function gearStatsText(stats) {
   if (stats.maxHp) parts.push(`HP +${Math.round(stats.maxHp)}`);
   if (stats.crit) parts.push(`会心 +${Math.round(stats.crit * 100)}%`);
   if (stats.focusGain) parts.push(`集中 +${Math.round(stats.focusGain * 100)}%`);
-  if (stats.dashCd) parts.push(`回避CT ${Math.round(stats.dashCd * 100)}%`);
   if (stats.pierce) parts.push(`貫通 +${Math.round(stats.pierce)}`);
   return parts.join(" / ");
 }
 function applyLoadout() {
   if (!player) return;
-  const stats = { damage: 0, rate: 0, speed: 0, maxHp: 0, crit: 0, focusGain: 0, dashCd: 0, pierce: 0 };
+  const stats = { damage: 0, rate: 0, speed: 0, maxHp: 0, crit: 0, focusGain: 0, pierce: 0 };
   for (const slot of GEAR_SLOTS) {
     const item = equippedItem(slot);
     const scaled = gearScaledStats(item, gearLevel(item.id));
@@ -5393,7 +5321,6 @@ function applyLoadout() {
   player.up.speed *= 1 + stats.speed;
   player.up.crit += stats.crit;
   player.up.focusGain += stats.focusGain;
-  player.up.dashCd *= Math.max(0.5, 1 + stats.dashCd);
   player.up.pierce += Math.round(stats.pierce || 0);
   player.maxHp = 120 + Math.round(stats.maxHp || 0);
   const counts = setCounts();
@@ -5796,8 +5723,6 @@ function setupInput() {
     if (e.repeat) return;
     if (e.code === "Escape" || e.code === "KeyP") {
       if (state === "playing" || state === "paused") togglePause();
-    } else if (e.code === "Space") {
-      tryDash();
     } else if (e.code === "KeyE") {
       tryFocus();
     } else if (e.code === "KeyM") {
