@@ -328,21 +328,27 @@
   .card.legendary .card-art{animation:epicGlyph 1.5s ease-in-out infinite alternate}
   .slot-roll{
     position:absolute;inset:0;z-index:4;display:none;overflow:hidden;pointer-events:none;
-    background:linear-gradient(180deg,#07100a 0%,#0b1710 50%,#07100a 100%);
+    background:linear-gradient(180deg,#07100a 0%,#102218 50%,#07100a 100%);
+    box-shadow:inset 0 0 30px rgba(0,0,0,.95),inset 0 0 0 1px rgba(255,255,255,.05);
   }
   .cards.spinning .slot-roll{display:block}
   .slot-strip{
     position:absolute;left:50%;top:0;width:100%;transform:translateX(-50%);
-    animation:slotRoll 1s cubic-bezier(.08,.72,.16,1) both;
+    animation:slotRoll 1.15s cubic-bezier(.08,.72,.16,1) both;
   }
-  .slot-strip span{display:grid;place-items:center;height:88px;opacity:.9}
-  .slot-strip svg{width:48px;height:48px;display:block}
+  .slot-strip span{display:grid;place-items:center;height:88px;opacity:1}
+  .slot-strip svg{width:54px;height:54px;display:block;filter:drop-shadow(0 0 8px currentColor)}
+  .slot-roll::before{
+    content:"";position:absolute;left:8%;right:8%;top:50%;height:2px;z-index:3;pointer-events:none;
+    background:var(--rc,#ffd66a);box-shadow:0 0 12px var(--rc,#ffd66a);opacity:.65;
+  }
   .slot-roll::after{
     content:"";position:absolute;inset:0;pointer-events:none;
-    background:linear-gradient(180deg,rgba(7,16,10,.96),transparent 18% 82%,rgba(7,16,10,.96));
+    background:linear-gradient(180deg,rgba(7,16,10,.9),transparent 12% 88%,rgba(7,16,10,.9));
   }
   @keyframes slotRoll{0%{transform:translate(-50%,0)}100%{transform:translate(-50%,-440px)}}
-  .cards.spinning .card{filter:blur(.4px)}
+  .cards.spinning .card{filter:blur(.55px);animation:slotShake .16s linear infinite}
+  @keyframes slotShake{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
   .cards.revealed .card{animation:slotLand .24s var(--ease)}
   @keyframes slotLand{from{transform:translateY(-5px) scale(.985)}to{transform:none}}
   .level-tip{font-size:9.5px;letter-spacing:.24em;color:var(--muted-2);margin-top:18px;font-weight:700}
@@ -481,6 +487,7 @@
   .gear-main{display:grid;grid-template-columns:78px 1fr;gap:10px;align-items:center}
   .gear-art{position:relative;width:78px;height:78px;border:1px solid rgba(255,255,255,.12);background:#07100a;overflow:hidden;flex:none}
   .gear-art .gear-svg{display:block;width:100%;height:100%}
+  .gear-kind{position:absolute;left:4px;top:4px;z-index:2;font-size:8px;letter-spacing:.12em;font-weight:700;color:#f0e8d6;background:rgba(4,9,6,.78);border:1px solid rgba(255,255,255,.16);padding:1px 4px;pointer-events:none}
   .gear-item.locked{opacity:.7}
   .gear-item.locked .gear-art{filter:grayscale(.55)}
   .gear-lock{position:absolute;inset:0;display:grid;place-items:center;background:rgba(4,9,6,.58);font-size:8px;letter-spacing:.18em;color:#d6cbb5;font-weight:700}
@@ -538,7 +545,7 @@
       linear-gradient(180deg,rgba(19,27,16,.96),rgba(7,12,8,.97));
     clip-path:polygon(18px 0,100% 0,100% calc(100% - 18px),calc(100% - 18px) 100%,0 100%,0 18px);
   }
-  .gacha-hero-art{width:200px;height:200px;border:1px solid rgba(255,214,106,.45);background:#07100a;box-shadow:0 0 40px rgba(233,196,106,.12)}
+  .gacha-hero-art{position:relative;width:200px;height:200px;border:1px solid rgba(255,214,106,.45);background:#07100a;box-shadow:0 0 40px rgba(233,196,106,.12)}
   .gacha-hero-art .gear-svg{width:100%;height:100%;display:block}
   .gacha-hero-info .kicker{margin-bottom:6px}
   .gacha-hero-info h3{font-family:"Cinzel",serif;font-weight:700;font-size:clamp(24px,3.2vw,34px);margin:0 0 8px;color:#fff3d3;text-shadow:0 0 24px rgba(255,214,106,.3)}
@@ -565,7 +572,7 @@
   .gacha-lineup{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
   .gacha-item{display:grid;grid-template-columns:72px 1fr;gap:9px;align-items:center;padding:8px;border:1px solid rgba(255,255,255,.1);background:rgba(7,12,8,.82)}
   .gacha-item.owned{border-color:rgba(233,196,106,.3)}
-  .gacha-item-art{width:72px;height:72px;border:1px solid rgba(255,255,255,.1);background:#07100a}
+  .gacha-item-art{position:relative;width:72px;height:72px;border:1px solid rgba(255,255,255,.1);background:#07100a}
   .gacha-item-art .gear-svg{width:100%;height:100%;display:block}
   .gacha-item-info{display:flex;flex-direction:column;gap:3px;min-width:0}
   .gacha-item-info b{font-family:"Cinzel",serif;font-size:13px;color:#f0e8d6;line-height:1.25}
@@ -583,7 +590,7 @@
   .gacha-result:nth-child(2n){animation-delay:.05s}
   .gacha-result:nth-child(3n){animation-delay:.1s}
   @keyframes gachaPop{from{opacity:0;transform:scale(.86) translateY(10px)}to{opacity:1;transform:none}}
-  .gacha-result-art{width:100%;aspect-ratio:1;max-width:130px}
+  .gacha-result-art{position:relative;width:100%;aspect-ratio:1;max-width:130px}
   .gacha-result-art .gear-svg{width:100%;height:100%;display:block}
   .gacha-result b{font-family:"Cinzel",serif;font-size:11px;line-height:1.25;color:#f0e8d6}
   .gacha-result .new{font-family:"Bebas Neue",sans-serif;font-size:14px;letter-spacing:.16em;color:var(--lime);text-shadow:0 0 12px rgba(255,230,163,.5)}
@@ -924,7 +931,6 @@
     <div class="level-wrap">
       <div class="level-kicker">LEVEL UP // SLOT REVEAL</div>
       <h2 class="level-title">LEVEL <span id="levelUpNum">2</span></h2>
-      <p class="level-sub">スロットを回して、3つの祝福からひとつ。</p>
       <div class="level-rule"></div>
       <div class="cards" id="upgradeCards"></div>
       <div class="level-tip" id="levelTip">回転中はタップでスキップ / 1・2・3キーで選択</div>
@@ -4249,7 +4255,7 @@ function buildUpgradeChoices() {
   if (dom.levelTip) dom.levelTip.textContent = "回転中… タップでスキップ";
   slotRolling = true;
   clearTimeout(slotTimer);
-  slotTimer = setTimeout(finishSlot, 1080);
+  slotTimer = setTimeout(finishSlot, 1200);
   dom.upgradeCards.querySelectorAll(".card").forEach((btn) => {
     btn.addEventListener("click", () => {
       if (slotRolling) { finishSlot(); return; }
@@ -5236,7 +5242,7 @@ function renderGear() {
       const canUpgrade = owned && !maxed && save.coins >= cost;
       return `<div class="gear-item rar-${item.rarity} ${equipped ? "equipped" : ""} ${owned ? "" : "locked"}">
         <div class="gear-main">
-          <div class="gear-art">${gearArtSVG(item)}${owned ? "" : '<span class="gear-lock">未獲得</span>'}</div>
+          <div class="gear-art">${gearArtSVG(item)}<span class="gear-kind">${GEAR_SLOT_NAMES[item.slot]}</span>${owned ? "" : '<span class="gear-lock">未獲得</span>'}</div>
           <div class="gear-info">
             <div class="gear-top">
               <span class="chip set-${item.set}">${GEAR_SETS[item.set].name}</span>
@@ -5329,12 +5335,12 @@ function gachaRarity() {
 function renderGacha() {
   updateGemUI();
   const hero = gearById("bone_bow");
-  if (dom.gachaHeroArt) dom.gachaHeroArt.innerHTML = gearArtSVG(hero);
+  if (dom.gachaHeroArt) dom.gachaHeroArt.innerHTML = gearArtSVG(hero) + '<span class="gear-kind">武器</span>';
   if (dom.gachaLineup) {
     dom.gachaLineup.innerHTML = GACHA_POOL.map((item) => {
       const owned = isGearOwned(item.id);
       return `<div class="gacha-item rar-${item.rarity} ${owned ? "owned" : ""}">
-        <div class="gacha-item-art">${gearArtSVG(item)}</div>
+        <div class="gacha-item-art">${gearArtSVG(item)}<span class="gear-kind">${GEAR_SLOT_NAMES[item.slot]}</span></div>
         <div class="gacha-item-info">
           <span class="rarity-tag rar-${item.rarity}">${RARITY_INFO[item.rarity].name}</span>
           <b>${item.name}</b>
@@ -5350,7 +5356,7 @@ function renderGacha() {
 function showGachaResults(results) {
   if (!dom.gachaResults) return;
   dom.gachaResults.innerHTML = results.map((r) => `<div class="gacha-result rar-${r.item.rarity}">
-    <div class="gacha-result-art">${gearArtSVG(r.item)}</div>
+    <div class="gacha-result-art">${gearArtSVG(r.item)}<span class="gear-kind">${GEAR_SLOT_NAMES[r.item.slot]}</span></div>
     <span class="rarity-tag rar-${r.item.rarity}">${RARITY_INFO[r.item.rarity].name}</span>
     <b>${r.item.name}</b>
     <span class="${r.isNew ? "new" : "dup"}">${r.isNew ? "NEW" : "DUP +" + r.coins + "◈"}</span>
