@@ -3321,7 +3321,7 @@ function createEnemyMesh(type, def) {
   }
 
   const glow = new THREE.Sprite(new THREE.SpriteMaterial({
-    map: EG.glowSprite, color: def.color, transparent: true, opacity: useTouchUI ? 0.34 : 0.2,
+    map: EG.glowSprite, color: def.color, transparent: true, opacity: useTouchUI ? 0.36 : 0.2,
     blending: THREE.AdditiveBlending, depthWrite: false,
   }));
   const glowScale = useTouchUI ? 1.18 : 1;
@@ -3335,14 +3335,14 @@ function createEnemyMesh(type, def) {
 function spawnEnemy(type, x, z, opts = {}) {
   const def = ENEMY_DEFS[type];
   const wave = Math.max(1, game.wave);
-  const hpMul = 1 + (wave - 1) * (isBossType(type) ? 0.095 : 0.12) + game.stage * 0.22;
+  const hpMul = 1 + (wave - 1) * (isBossType(type) ? 0.085 : 0.12) + game.stage * 0.22;
   const speedMul = 1 + Math.min(0.3, (wave - 1) * 0.02);
   const piece = createEnemyMesh(type, def);
   const spawnMax = isBossType(type) ? 1.8 : 0.7;
   let hpBase = def.hpb;
   if (type === "golemBoss") hpBase = 340 + wave * 30;
   if (type === "dragon") hpBase = 400 + wave * 32;
-  const baseScale = (piece.parts.baseScale || 1) * (useTouchUI && !isBossType(type) ? 1.15 : 1);
+  const baseScale = (piece.parts.baseScale || 1) * (useTouchUI && !isBossType(type) ? 1.2 : 1);
 
   const e = {
     type, def,
