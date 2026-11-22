@@ -933,7 +933,7 @@
       <h2 class="level-title">LEVEL <span id="levelUpNum">2</span></h2>
       <div class="level-rule"></div>
       <div class="cards" id="upgradeCards"></div>
-      <div class="level-tip" id="levelTip">回転中はタップでスキップ / 1・2・3キーで選択</div>
+      <div class="level-tip" id="levelTip">1 / 2 / 3 キーでも選択できます</div>
     </div>
   </section>
 
@@ -4252,13 +4252,13 @@ function buildUpgradeChoices() {
   `).join("");
   dom.upgradeCards.classList.remove("revealed");
   dom.upgradeCards.classList.add("spinning");
-  if (dom.levelTip) dom.levelTip.textContent = "回転中… タップでスキップ";
+  if (dom.levelTip) dom.levelTip.textContent = "回転中…";
   slotRolling = true;
   clearTimeout(slotTimer);
   slotTimer = setTimeout(finishSlot, 1200);
   dom.upgradeCards.querySelectorAll(".card").forEach((btn) => {
     btn.addEventListener("click", () => {
-      if (slotRolling) { finishSlot(); return; }
+      if (slotRolling) return;
       chooseUpgrade(Number(btn.dataset.index));
     });
   });
@@ -4287,7 +4287,7 @@ function triggerLevelUp() {
 
 function chooseUpgrade(i) {
   if (state !== "levelup") return;
-  if (slotRolling) finishSlot();
+  if (slotRolling) return;
   const card = activeChoices[i];
   if (!card) return;
   card.apply();
@@ -5621,11 +5621,6 @@ function setupUI() {
     openGear(origin);
   });
   dom.btnPull1.addEventListener("click", () => pullGacha(1));
-  dom.screenLevel.addEventListener("pointerdown", (e) => {
-    if (!slotRolling) return;
-    if (e.target.closest && e.target.closest(".card")) return;
-    finishSlot();
-  });
   dom.btnPull10.addEventListener("click", () => pullGacha(10));
   dom.btnBackTitle.addEventListener("click", quitToTitle);
   dom.btnHow.addEventListener("click", () => dom.howPanel.classList.toggle("on"));
