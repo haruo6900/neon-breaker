@@ -336,17 +336,17 @@
     position:absolute;left:50%;top:0;width:100%;transform:translateX(-50%);
     animation:slotRoll 1.15s cubic-bezier(.08,.72,.16,1) both;
   }
-  .slot-strip span{display:grid;place-items:center;height:88px;opacity:1}
-  .slot-strip svg{width:54px;height:54px;display:block;filter:drop-shadow(0 0 8px currentColor)}
+  .slot-strip span{display:grid;place-items:center;height:64px;opacity:1}
+  .slot-strip svg{width:44px;height:44px;display:block;filter:drop-shadow(0 0 10px rgba(255,230,163,.9))}
   .slot-roll::before{
     content:"";position:absolute;left:8%;right:8%;top:50%;height:2px;z-index:3;pointer-events:none;
     background:var(--rc,#ffd66a);box-shadow:0 0 12px var(--rc,#ffd66a);opacity:.65;
   }
   .slot-roll::after{
     content:"";position:absolute;inset:0;pointer-events:none;
-    background:linear-gradient(180deg,rgba(7,16,10,.9),transparent 12% 88%,rgba(7,16,10,.9));
+    background:linear-gradient(180deg,rgba(7,16,10,.82),transparent 8% 92%,rgba(7,16,10,.82));
   }
-  @keyframes slotRoll{0%{transform:translate(-50%,0)}100%{transform:translate(-50%,-440px)}}
+  @keyframes slotRoll{0%{transform:translate(-50%,0)}100%{transform:translate(-50%,-704px)}}
   .cards.spinning .card{filter:blur(.55px);animation:slotShake .16s linear infinite}
   @keyframes slotShake{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
   .cards.revealed .card{animation:slotLand .24s var(--ease)}
@@ -4178,9 +4178,9 @@ function makeBowCard() {
 }
 
 
-function upgradeArtSVG(card) {
+function upgradeArtSVG(card, spin) {
   const info = RARITY_INFO[card.rarity] || RARITY_INFO.uncommon;
-  const col = info.color;
+  const col = spin ? "#ffe6a3" : info.color;
   const icons = {
     power: '<path d="M20 46 C10 34 16 16 28 10 C24 24 27 36 36 46"/><path d="M16 30 H46"/><path d="M46 30 l-6 -4 M46 30 l-6 4"/>',
     haste: '<path d="M14 22 H38 M14 32 H46 M14 42 H32"/><path d="M32 17 l6 5 -6 5"/><path d="M40 27 l6 5 -6 5"/>',
@@ -4201,8 +4201,8 @@ function slotStripHTML() {
   const ids = ["power","haste","swift","vitality","crit","lifesteal","multishot","pierce","homing","bow"];
   const rarities = ["uncommon","rare","epic","legendary"];
   let html = '<div class="slot-roll" aria-hidden="true"><div class="slot-strip">';
-  for (let i = 0; i < 6; i++) {
-    html += '<span>' + upgradeArtSVG({ id: pick(ids), rarity: pick(rarities) }) + '</span>';
+  for (let i = 0; i < 12; i++) {
+    html += '<span>' + upgradeArtSVG({ id: pick(ids), rarity: pick(rarities) }, true) + '</span>';
   }
   return html + '</div></div>';
 }
