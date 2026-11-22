@@ -5615,6 +5615,11 @@ function setupUI() {
     openGear(origin);
   });
   dom.btnPull1.addEventListener("click", () => pullGacha(1));
+  dom.screenLevel.addEventListener("pointerdown", (e) => {
+    if (!slotRolling) return;
+    if (e.target.closest && e.target.closest(".card")) return;
+    finishSlot();
+  });
   dom.btnPull10.addEventListener("click", () => pullGacha(10));
   dom.btnBackTitle.addEventListener("click", quitToTitle);
   dom.btnHow.addEventListener("click", () => dom.howPanel.classList.toggle("on"));
