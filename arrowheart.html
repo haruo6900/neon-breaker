@@ -151,6 +151,7 @@
   .wave-chip{display:inline-flex;align-items:baseline;gap:8px;padding:4px 16px;border:1px solid var(--line);background:rgba(8,14,10,.66);clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)}
   .wave-chip span{font-size:10px;letter-spacing:.34em;color:var(--muted);font-weight:700}
   .wave-chip b{font-family:"Bebas Neue",sans-serif;font-size:26px;line-height:.9;color:#f6efdc;letter-spacing:.06em}
+  .wave-chip i{font-style:normal;font-family:"Bebas Neue",sans-serif;font-size:13px;letter-spacing:.08em;color:var(--muted);align-self:flex-end;padding-bottom:2px}
   .enemy-chip{margin-top:5px;font-size:9px;letter-spacing:.24em;color:var(--muted-2);font-weight:700}
   .enemy-chip b{color:var(--pink);font-family:"Bebas Neue",sans-serif;font-size:14px;letter-spacing:.08em}
 
@@ -754,7 +755,7 @@
 
     <div class="hud-center">
       <div class="stage-tag" id="hudStage">STAGE 01 · WHISPERING GLADE</div>
-      <div class="wave-chip"><span>WAVE</span><b id="waveNum">01</b></div>
+      <div class="wave-chip"><span>WAVE</span><b id="waveNum">01</b><i>/ 30</i></div>
       <div class="enemy-chip"><b id="enemyNum">0</b> FOES REMAIN</div>
     </div>
 
@@ -1388,26 +1389,26 @@ const BOW_TIERS = [
 ];
 const UPGRADE_DEFS = [
   {
-    id: "power", name: "剛弓", glyph: "剛", rarity: "common", tag: "ATTACK", max: 99,
-    desc: "矢の攻撃力が +15% 上がる。",
-    apply() { player.up.damage *= 1.15; },
+    id: "power", name: "剛弓", glyph: "剛", rarity: "common", tag: "ATTACK", max: 10,
+    desc: "矢の攻撃力が +12% 上がる。",
+    apply() { player.up.damage += 0.12; },
   },
   {
-    id: "haste", name: "早撃ち", glyph: "早", rarity: "common", tag: "ATTACK", max: 99,
-    desc: "弓を引く速度が +15% 上がる。",
-    apply() { player.up.rate *= 1.15; },
+    id: "haste", name: "早撃ち", glyph: "早", rarity: "common", tag: "ATTACK", max: 10,
+    desc: "弓を引く速度が +10% 上がる。",
+    apply() { player.up.rate += 0.10; },
   },
   {
-    id: "swift", name: "風の靴", glyph: "風", rarity: "common", tag: "MOVE", max: 99,
-    desc: "移動速度が +8% 上がる。",
-    apply() { player.up.speed *= 1.08; },
+    id: "swift", name: "風の靴", glyph: "風", rarity: "common", tag: "MOVE", max: 5,
+    desc: "移動速度が +6% 上がる。",
+    apply() { player.up.speed += 0.06; },
   },
   {
-    id: "vitality", name: "生命の護符", glyph: "命", rarity: "common", tag: "LIFE", max: 99,
-    desc: "最大HP +20。さらにHPを20回復する。",
+    id: "vitality", name: "生命の護符", glyph: "命", rarity: "common", tag: "LIFE", max: 8,
+    desc: "最大HP +15。さらにHPを15回復する。",
     apply() {
-      player.maxHp += 20;
-      player.hp = Math.min(player.maxHp, player.hp + 20);
+      player.maxHp += 15;
+      player.hp = Math.min(player.maxHp, player.hp + 15);
     },
   },
   {
@@ -1416,37 +1417,37 @@ const UPGRADE_DEFS = [
     apply() { player.up.multishot += 1; },
   },
   {
-    id: "pierce", name: "貫通の矢", glyph: "貫", rarity: "rare", tag: "ATTACK", max: 3,
+    id: "pierce", name: "貫通の矢", glyph: "貫", rarity: "rare", tag: "ATTACK", max: 2,
     desc: "矢が敵を1体貫通して飛び続ける。",
     apply() { player.up.pierce += 1; },
   },
   {
     id: "homing", name: "導きの風", glyph: "導", rarity: "rare", tag: "ATTACK", max: 1,
-    desc: "矢が近くの敵を追尾する。ただし攻撃力 -10%。",
+    desc: "矢が近くの敵を追尾する。ただし攻撃力 -20%。",
     apply() {
       player.up.homing = true;
-      player.up.damage *= 0.9;
+      player.up.damage *= 0.8;
     },
   },
   {
-    id: "lifesteal", name: "吸命の紋", glyph: "吸", rarity: "rare", tag: "LIFE", max: 3,
-    desc: "魔物を倒すたびにHPが2回復する。",
+    id: "lifesteal", name: "吸命の紋", glyph: "吸", rarity: "rare", tag: "LIFE", max: 2,
+    desc: "魔物を倒すたびにHPが1回復する。",
     apply() { player.up.lifesteal += 1; },
   },
   {
     id: "crit", name: "急所狙い", glyph: "会", rarity: "rare", tag: "ATTACK", max: 4,
-    desc: "会心率が +12% 上がる。会心の矢は2倍のダメージ。",
-    apply() { player.up.crit = Math.min(0.6, player.up.crit + 0.12); },
+    desc: "会心率が +8% 上がる。会心の矢は2倍のダメージ。",
+    apply() { player.up.crit = Math.min(0.55, player.up.crit + 0.08); },
   },
   {
     id: "dash", name: "軽業", glyph: "軽", rarity: "common", tag: "MOVE", max: 3,
-    desc: "回避のクールダウンが -20% 短くなる。",
-    apply() { player.up.dashCd *= 0.8; },
+    desc: "回避のクールダウンが -15% 短くなる。",
+    apply() { player.up.dashCd *= 0.85; },
   },
   {
     id: "focus", name: "集中の理", glyph: "集", rarity: "rare", tag: "SPIRIT", max: 3,
-    desc: "集中ゲージの獲得量が +25% 増える。",
-    apply() { player.up.focusGain *= 1.25; },
+    desc: "集中ゲージの獲得量が +20% 増える。",
+    apply() { player.up.focusGain *= 1.2; },
   },
 ];
 const STAGE_WAVES = 30;
@@ -1548,7 +1549,7 @@ const gearScaledStats = (item, level) => {
   for (const key of Object.keys(item.base)) out[key] = item.base[key] * k;
   return out;
 };
-const xpNextFor = (level) => Math.round(5 + level * 3 + level * level * 0.35);
+const xpNextFor = (level) => Math.round(6 + level * 4 + level * level * 0.5);
 
 
 const game = {
@@ -1606,7 +1607,7 @@ function initThree() {
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = useTouchUI ? 1.4 : 1.25;
+  renderer.toneMappingExposure = useTouchUI ? 1.45 : 1.25;
   dom.webgl.appendChild(renderer.domElement);
 
   scene = new THREE.Scene();
@@ -1651,7 +1652,7 @@ function initThree() {
 
 function onResize() {
   if (!renderer || !camera) return;
-  camera.fov = useTouchUI && innerHeight > innerWidth ? 70 : 54;
+  camera.fov = useTouchUI && innerHeight > innerWidth ? 90 : 54;
   camera.aspect = innerWidth / innerHeight;
   camera.updateProjectionMatrix();
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isTouch ? 1.7 : 2));
@@ -3320,7 +3321,7 @@ function createEnemyMesh(type, def) {
   }
 
   const glow = new THREE.Sprite(new THREE.SpriteMaterial({
-    map: EG.glowSprite, color: def.color, transparent: true, opacity: useTouchUI ? 0.32 : 0.2,
+    map: EG.glowSprite, color: def.color, transparent: true, opacity: useTouchUI ? 0.34 : 0.2,
     blending: THREE.AdditiveBlending, depthWrite: false,
   }));
   const glowScale = useTouchUI ? 1.18 : 1;
@@ -3334,14 +3335,14 @@ function createEnemyMesh(type, def) {
 function spawnEnemy(type, x, z, opts = {}) {
   const def = ENEMY_DEFS[type];
   const wave = Math.max(1, game.wave);
-  const hpMul = 1 + (wave - 1) * (isBossType(type) ? 0.08 : 0.10);
+  const hpMul = 1 + (wave - 1) * (isBossType(type) ? 0.095 : 0.12) + game.stage * 0.22;
   const speedMul = 1 + Math.min(0.3, (wave - 1) * 0.02);
   const piece = createEnemyMesh(type, def);
   const spawnMax = isBossType(type) ? 1.8 : 0.7;
   let hpBase = def.hpb;
   if (type === "golemBoss") hpBase = 340 + wave * 30;
   if (type === "dragon") hpBase = 400 + wave * 32;
-  const baseScale = (piece.parts.baseScale || 1) * (useTouchUI && !isBossType(type) ? 1.12 : 1);
+  const baseScale = (piece.parts.baseScale || 1) * (useTouchUI && !isBossType(type) ? 1.15 : 1);
 
   const e = {
     type, def,
@@ -3902,7 +3903,7 @@ function makePlayerArrow(angle) {
     }
     const b = {
       mesh: g, vx, vz, life: 1.45, angle: ang,
-      dmg: 22 * player.up.damage * tierBonus * (focus ? 1.25 : 1) * Math.pow(0.85, player.up.multishot) * (player.autoFire ? player.up.autoDamage : 1),
+      dmg: 22 * player.up.damage * tierBonus * (focus ? 1.25 : 1) * Math.pow(0.78, player.up.multishot) * (player.autoFire ? player.up.autoDamage : 1),
       radius: 0.3,
       pierce: player.up.pierce + (focus ? 1 : 0),
       hitSet: new Set(),
@@ -4093,7 +4094,7 @@ function killEnemy(e, byPlayer) {
     addScore(e.score, e.pos.x, e.pos.y + 1.6, e.pos.z, isBossType(e.type) ? "gold" : "");
     gainOD((isBossType(e.type) ? 40 : e.type === "golem" ? 12 : 6) * player.up.focusGain);
     if (player.up.lifesteal > 0) {
-      const heal = player.up.lifesteal * 2;
+      const heal = player.up.lifesteal;
       player.hp = Math.min(player.maxHp, player.hp + heal);
       damageText(e.pos.x, e.pos.y + 1.2, e.pos.z, "+" + heal + " HP", "cyan");
     }
@@ -4274,13 +4275,13 @@ function makeBowCard() {
     desc, apply() {
       player.bowTier += 1;
       if (player.bowTier === 1) {
-        player.up.damage *= 1.18;
+        player.up.damage += 0.15;
       } else if (player.bowTier === 2) {
-        player.up.damage *= 1.22;
-        player.up.rate *= 1.12;
+        player.up.damage += 0.18;
+        player.up.rate += 0.10;
       } else {
-        player.up.damage *= 1.3;
-        player.up.rate *= 1.05;
+        player.up.damage += 0.22;
+        player.up.rate += 0.08;
         player.up.pierce += 1;
       }
       applyBowTierVisuals();
@@ -4398,7 +4399,7 @@ function pickSpawnPos(minDist = 14) {
   if (useTouchUI && minDist < 20) {
     const rMin = Math.max(10, minDist);
     for (let tries = 0; tries < 24; tries++) {
-      const a = -Math.PI / 2 + rand(-0.65, 0.65);
+      const a = -Math.PI / 2 + rand(-0.7, 0.7);
       const r = rand(rMin, rMin + 5);
       const x = clamp(player.pos.x + Math.cos(a) * r, -33, 33);
       const z = clamp(player.pos.z + Math.sin(a) * r, -33, 33);
@@ -4475,7 +4476,8 @@ function addShake(v) {
 
 function hurtPlayer(amount, sx, sz) {
   if (!player.alive || player.invuln > 0 || state !== "playing") return;
-  player.hp = Math.max(0, player.hp - amount);
+  const scaled = amount * (1 + Math.max(0, game.wave - 10) * 0.035 + game.stage * 0.1);
+  player.hp = Math.max(0, player.hp - scaled);
   player.invuln = 0.7;
   game.hurtFlash = 0.32;
   game.combo = 0;
@@ -4488,7 +4490,7 @@ function hurtPlayer(amount, sx, sz) {
   player.vel.x += (dx / d) * 7;
   player.vel.z += (dz / d) * 7;
   spawnParticles(player.pos.x, 1.3, player.pos.z, 0xff5a6a, 14, 7, 1.2, 0.45, 9);
-  damageText(player.pos.x + rand(-0.3, 0.3), 2.55, player.pos.z + rand(-0.3, 0.3), String(Math.round(amount)), "hurt");
+  damageText(player.pos.x + rand(-0.3, 0.3), 2.55, player.pos.z + rand(-0.3, 0.3), String(Math.round(scaled)), "hurt");
   updateComboUI();
   if (player.hp <= 0) playerDie();
 }
@@ -4876,7 +4878,7 @@ function updateWaves(dt) {
     game.breakTimer = 2.9;
     const bonus = 200 + wave * 120;
     addScore(bonus, player.pos.x, 2.4, player.pos.z, "cyan");
-    player.hp = Math.min(player.maxHp, player.hp + 12);
+    player.hp = Math.min(player.maxHp, player.hp + 8);
     banner("WAVE CLEAR", `BONUS +${fmt(bonus)}  //  +${fmt(coinGain)}◈`, "THE FOREST RESTORES YOU", 2.1);
     audio.sfxPickup();
     beamFlash(player.pos.x, player.pos.z, 0x9fffaa, 0.9, 1.5);
@@ -4910,8 +4912,8 @@ function updateCamera(dt, t) {
     camDesired.set(Math.cos(a) * 37, 26, Math.sin(a) * 37);
     camTargetLook.set(0, 2.4, 0);
   } else if (useTouchUI && innerHeight > innerWidth) {
-    camDesired.set(player.pos.x, 13.5, player.pos.z + 12.5);
-    camTargetLook.set(player.pos.x, 1.5, player.pos.z - 10);
+    camDesired.set(player.pos.x, 12, player.pos.z + 11.5);
+    camTargetLook.set(player.pos.x, 1.5, player.pos.z - 9);
   } else {
     camDesired.set(player.pos.x, 22, player.pos.z + 19);
     camTargetLook.set(player.pos.x, 1.6, player.pos.z - 2.2);
@@ -5403,7 +5405,7 @@ function applyLoadout() {
   if (counts.moon >= 3) player.up.crit += 0.1;
   if (counts.dragon >= 2) player.up.damage *= 1.08;
   if (counts.dragon >= 3) player.up.pierce += 1;
-  player.up.crit = Math.min(0.8, player.up.crit);
+  player.up.crit = Math.min(0.65, player.up.crit);
   player.hp = player.maxHp;
   const weapon = equippedItem("weapon");
   player.bowTier = Math.max(player.bowTier, weapon.tier || 0);
