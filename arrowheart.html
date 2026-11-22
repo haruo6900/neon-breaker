@@ -62,33 +62,6 @@
   #vignette{background:radial-gradient(ellipse at 50% 45%,transparent 38%,rgba(0,0,0,.62) 100%)}
   #scan{background:repeating-linear-gradient(0deg,rgba(233,196,106,.05) 0 1px,transparent 1px 3px);opacity:.3;mix-blend-mode:screen}
   #hurt{background:radial-gradient(ellipse at 50% 50%,transparent 30%,rgba(224,90,79,.62) 100%);opacity:0;transition:opacity .4s ease}
-  #odfx{background:linear-gradient(90deg,rgba(233,196,106,.16),transparent 28% 72%,rgba(110,231,168,.16)),radial-gradient(ellipse at 50% 55%,transparent 45%,rgba(233,196,106,.18) 100%);opacity:0;transition:opacity .4s ease;z-index:2}
-  #odfx.on{opacity:1;animation:odPulse 1.1s infinite alternate}
-  @keyframes odPulse{from{filter:brightness(.8)}to{filter:brightness(1.5)}}
-
-  /* ---------- crosshair ---------- */
-  #crosshair{
-    position:fixed;left:50%;top:50%;width:54px;height:54px;
-    margin:-27px 0 0 -27px;z-index:5;pointer-events:none;opacity:0;
-    transition:opacity .2s,width .15s,height .15s,margin .15s;
-    filter:drop-shadow(0 0 8px rgba(233,196,106,.95));
-  }
-  body.aim #crosshair{opacity:1}
-  #crosshair::before{
-    content:"";position:absolute;inset:15px;border:2px solid rgba(255,248,225,.98);
-    border-radius:50%;box-shadow:0 0 12px rgba(233,196,106,.65),inset 0 0 8px rgba(233,196,106,.35);
-  }
-  #crosshair::after{
-    content:"";position:absolute;left:50%;top:50%;width:5px;height:5px;margin:-2.5px 0 0 -2.5px;
-    background:var(--cyan);border-radius:50%;box-shadow:0 0 10px var(--cyan);
-  }
-  #crosshair i{position:absolute;background:rgba(255,248,225,.95);box-shadow:0 0 7px var(--cyan)}
-  #crosshair i:nth-child(1){left:50%;top:0;width:2px;height:10px;margin-left:-1px}
-  #crosshair i:nth-child(2){left:50%;bottom:0;width:2px;height:10px;margin-left:-1px}
-  #crosshair i:nth-child(3){top:50%;left:0;height:2px;width:10px;margin-top:-1px}
-  #crosshair i:nth-child(4){top:50%;right:0;height:2px;width:10px;margin-top:-1px}
-  #crosshair.hit{width:66px;height:66px;margin:-33px 0 0 -33px}
-
   /* ---------- floating damage numbers ---------- */
   #dmgLayer{position:fixed;inset:0;z-index:5;pointer-events:none;overflow:hidden}
   .dmg{
@@ -138,12 +111,6 @@
   .meter .ticks{position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 19px,rgba(4,8,5,.55) 19px 21px);pointer-events:none}
   .meter.hp .fill{background:linear-gradient(90deg,#6ee7a8,#d7f5b0 55%,#e9c46a);box-shadow:0 0 14px rgba(233,196,106,.5)}
   .meter.hp.low .fill{background:linear-gradient(90deg,#e05a4f,#f4a261);box-shadow:0 0 14px rgba(224,90,79,.55)}
-  .meter.od{height:7px}
-  .meter.od .fill{width:0%;background:linear-gradient(90deg,#ffe6a3,#e9c46a);box-shadow:0 0 14px rgba(110,231,168,.55)}
-  .meter.od.ready .fill{animation:odReady .7s infinite alternate}
-  @keyframes odReady{from{filter:brightness(1)}to{filter:brightness(1.85)}}
-  .subline{display:flex;align-items:center;justify-content:space-between;margin-top:7px;font-size:9px;letter-spacing:.2em;color:var(--muted);font-weight:700}
-  .subline b{color:var(--cyan);font-family:"Bebas Neue",sans-serif;font-size:13px;letter-spacing:.1em}
 
   .hud-center{position:absolute;top:calc(14px + var(--safe-t));left:50%;transform:translateX(-50%);text-align:center;min-width:240px}
   .wave-chip{display:inline-flex;align-items:baseline;gap:8px;padding:4px 16px;border:1px solid var(--line);background:rgba(8,14,10,.66);clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)}
@@ -178,16 +145,6 @@
   .best-mini{font-size:9px;letter-spacing:.2em;color:var(--muted-2);font-weight:700}
   .best-mini b{font-family:"Bebas Neue",sans-serif;color:var(--muted);font-size:13px;letter-spacing:.08em}
 
-  #combo{
-    position:absolute;left:calc(22px + var(--safe-l));bottom:calc(86px + var(--safe-b));
-    display:flex;align-items:baseline;gap:6px;opacity:0;transform:translateY(8px);
-    transition:opacity .2s,transform .2s var(--ease);text-shadow:0 0 20px rgba(255,230,163,.4);
-  }
-  #combo.on{opacity:1;transform:none}
-  #combo .x{font-family:"Bebas Neue",sans-serif;font-size:30px;color:var(--lime)}
-  #combo b{font-family:"Bebas Neue",sans-serif;font-size:56px;line-height:.8;color:#f6efdc}
-  #combo .lbl{font-size:9px;letter-spacing:.34em;color:var(--lime);font-weight:700}
-  body.touch #combo{left:calc(20px + var(--safe-l));bottom:calc(172px + var(--safe-b))}
   body.touch #hint{bottom:calc(176px + var(--safe-b));max-width:70vw}
   body.touch #hint span{font-size:9px;padding:5px 7px}
 
@@ -330,7 +287,7 @@
       linear-gradient(0deg,rgba(4,9,6,.94),rgba(4,9,6,.82));
     backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
   }
-  body.levelup #mobile,body.levelup #crosshair,body.levelup #hint{display:none!important;opacity:0!important}
+  body.levelup #mobile,body.levelup #hint{display:none!important;opacity:0!important}
   .level-wrap{width:min(1040px,100%);text-align:center;padding:8px 0}
   .level-kicker{font-size:10px;letter-spacing:.5em;color:var(--pink);font-weight:700;margin-bottom:8px}
   .level-title{font-family:"Cinzel",serif;font-weight:700;font-size:clamp(34px,5.6vw,58px);line-height:1;color:#f7e7b8;letter-spacing:.06em;margin:0 0 8px;text-shadow:0 0 34px rgba(233,196,106,.34)}
@@ -356,12 +313,38 @@
   .card h3{font-family:"Cinzel",serif;font-weight:700;font-size:21px;line-height:1.15;letter-spacing:.02em;margin:0;color:#f7efdb}
   .card p{margin:0;font-size:11.5px;line-height:1.75;color:var(--muted);min-height:40px}
   .card .card-tag{font-size:8px;letter-spacing:.3em;color:var(--muted-2);font-weight:700;margin-top:auto;padding-top:8px;border-top:1px solid rgba(255,255,255,.07)}
-  .card.rare{border-color:rgba(110,231,168,.42);background:linear-gradient(180deg,rgba(16,32,21,.97),rgba(7,15,9,.97))}
-  .card.rare .glyph{color:var(--pink);text-shadow:0 0 18px rgba(110,231,168,.55)}
-  .card.rare .rarity{color:var(--pink)}
-  .card.epic{border-color:rgba(233,196,106,.7);background:linear-gradient(180deg,rgba(34,30,16,.97),rgba(12,14,8,.97));box-shadow:0 0 26px rgba(233,196,106,.1)}
-  .card.epic .glyph{color:var(--lime);text-shadow:0 0 22px rgba(255,230,163,.75)}
-  .card.epic .rarity{color:var(--lime)}
+  .card{--rc:#b8c0b0}
+  .card.uncommon{--rc:#6ee7a8;border-color:rgba(110,231,168,.45);background:linear-gradient(180deg,rgba(16,32,21,.97),rgba(7,15,9,.97))}
+  .card.rare{--rc:#5aa9ff;border-color:rgba(90,169,255,.5);background:linear-gradient(180deg,rgba(14,25,38,.97),rgba(6,12,20,.97))}
+  .card.epic{--rc:#c77dff;border-color:rgba(199,125,255,.62);background:linear-gradient(180deg,rgba(30,18,40,.97),rgba(10,6,16,.97));box-shadow:0 0 28px rgba(199,125,255,.13)}
+  .card.legendary{--rc:#ffd66a;border-color:rgba(255,214,106,.8);background:linear-gradient(180deg,rgba(42,34,14,.98),rgba(13,10,5,.98));box-shadow:0 0 34px rgba(255,214,106,.18),inset 0 0 24px rgba(255,214,106,.04)}
+  .card.uncommon .rarity,.card.rare .rarity,.card.epic .rarity,.card.legendary .rarity{color:var(--rc)}
+  .card-art{
+    width:66px;height:66px;border-radius:50%;display:grid;place-items:center;flex:none;
+    border:1px solid var(--rc);background:radial-gradient(circle at 40% 35%,rgba(255,255,255,.1),rgba(6,13,8,.82) 70%);
+    box-shadow:0 0 20px rgba(255,255,255,.06),inset 0 0 16px rgba(255,255,255,.04);color:var(--rc);
+  }
+  .card-art svg{width:52px;height:52px;display:block}
+  .card.legendary .card-art{animation:epicGlyph 1.5s ease-in-out infinite alternate}
+  .slot-roll{
+    position:absolute;inset:0;z-index:4;display:none;overflow:hidden;pointer-events:none;
+    background:linear-gradient(180deg,#07100a 0%,#0b1710 50%,#07100a 100%);
+  }
+  .cards.spinning .slot-roll{display:block}
+  .slot-strip{
+    position:absolute;left:50%;top:0;width:100%;transform:translateX(-50%);
+    animation:slotRoll 1s cubic-bezier(.08,.72,.16,1) both;
+  }
+  .slot-strip span{display:grid;place-items:center;height:88px;opacity:.9}
+  .slot-strip svg{width:48px;height:48px;display:block}
+  .slot-roll::after{
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background:linear-gradient(180deg,rgba(7,16,10,.96),transparent 18% 82%,rgba(7,16,10,.96));
+  }
+  @keyframes slotRoll{0%{transform:translate(-50%,0)}100%{transform:translate(-50%,-440px)}}
+  .cards.spinning .card{filter:blur(.4px)}
+  .cards.revealed .card{animation:slotLand .24s var(--ease)}
+  @keyframes slotLand{from{transform:translateY(-5px) scale(.985)}to{transform:none}}
   .level-tip{font-size:9.5px;letter-spacing:.24em;color:var(--muted-2);margin-top:18px;font-weight:700}
 
   /* catchier blessing cards */
@@ -391,11 +374,7 @@
     box-shadow:0 0 24px rgba(233,196,106,.18),inset 0 0 18px rgba(233,196,106,.08);
     font-size:26px;line-height:1;color:var(--lime);text-shadow:0 0 16px rgba(255,230,163,.7);
   }
-  .card.rare .glyph{border-color:rgba(110,231,168,.55);box-shadow:0 0 24px rgba(110,231,168,.22),inset 0 0 18px rgba(110,231,168,.1);color:var(--pink);text-shadow:0 0 16px rgba(110,231,168,.7)}
-  .card.epic .glyph{border-color:rgba(255,230,163,.8);box-shadow:0 0 30px rgba(233,196,106,.35),inset 0 0 20px rgba(255,230,163,.12);animation:epicGlyph 1.6s ease-in-out infinite alternate}
-  @keyframes epicGlyph{from{box-shadow:0 0 20px rgba(233,196,106,.25),inset 0 0 16px rgba(255,230,163,.08)}to{box-shadow:0 0 40px rgba(233,196,106,.5),inset 0 0 24px rgba(255,230,163,.2)}}
-  .card.epic{border-color:rgba(255,230,163,.75);box-shadow:0 0 34px rgba(233,196,106,.16),inset 0 0 30px rgba(233,196,106,.05)}
-  .card.epic .rarity{color:var(--lime)}
+  @keyframes epicGlyph{from{box-shadow:0 0 20px rgba(255,214,106,.25),inset 0 0 16px rgba(255,214,106,.08)}to{box-shadow:0 0 40px rgba(255,214,106,.5),inset 0 0 24px rgba(255,214,106,.2)}}
   .card .rarity{display:inline-flex;align-items:center;gap:5px}
   .card .rarity::before{content:"";width:5px;height:5px;background:currentColor;transform:rotate(45deg);box-shadow:0 0 8px currentColor}
   .card h3{text-shadow:0 0 20px rgba(233,196,106,.15)}
@@ -417,6 +396,8 @@
     .cards{grid-template-columns:1fr;gap:9px;margin-top:16px;max-width:520px;margin-left:auto;margin-right:auto}
     .card{padding:13px 14px;display:grid;grid-template-columns:52px 1fr;gap:2px 12px;align-items:center}
     .card .glyph{grid-row:span 2;width:46px;height:46px;font-size:21px;text-align:center}
+    .card-art{grid-row:span 2;width:48px;height:48px}
+    .card-art svg{width:38px;height:38px}
     .card .rarity{grid-column:2}
     .card h3{grid-column:2;font-size:18px}
     .card p{grid-column:2;font-size:11px;min-height:0}
@@ -505,7 +486,15 @@
   .gear-lock{position:absolute;inset:0;display:grid;place-items:center;background:rgba(4,9,6,.58);font-size:8px;letter-spacing:.18em;color:#d6cbb5;font-weight:700}
   .gear-top{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
   .rarity-tag{font-family:"Bebas Neue",sans-serif;font-size:10px;letter-spacing:.1em;padding:0 5px;border:1px solid currentColor;line-height:1.5}
-  .rar-N{color:#b8c0b0}.rar-R{color:#6ee7a8}.rar-SR{color:#7cc7ff}.rar-SSR{color:#ffd66a;text-shadow:0 0 8px rgba(255,214,106,.5)}
+  .rarity-tag.rar-uncommon{color:#6ee7a8;text-shadow:0 0 8px rgba(110,231,168,.3)}.rarity-tag.rar-rare{color:#5aa9ff;text-shadow:0 0 8px rgba(90,169,255,.35)}.rarity-tag.rar-epic{color:#c77dff;text-shadow:0 0 8px rgba(199,125,255,.4)}.rarity-tag.rar-legendary{color:#ffd66a;text-shadow:0 0 10px rgba(255,214,106,.55)}
+  .gear-item.rar-uncommon{border-color:rgba(110,231,168,.28)}
+  .gear-item.rar-rare{border-color:rgba(90,169,255,.34)}
+  .gear-item.rar-epic{border-color:rgba(199,125,255,.42);box-shadow:0 0 18px rgba(199,125,255,.07)}
+  .gear-item.rar-legendary{border-color:rgba(255,214,106,.5);box-shadow:0 0 22px rgba(255,214,106,.09)}
+  .gear-item.equipped{border-color:rgba(233,196,106,.7);box-shadow:0 0 22px rgba(233,196,106,.12)}
+  .gacha-item.rar-rare{border-color:rgba(90,169,255,.34)}
+  .gacha-item.rar-epic{border-color:rgba(199,125,255,.42)}
+  .gacha-item.rar-legendary{border-color:rgba(255,214,106,.5)}
   .gear-item h4{font-size:15px}
   .gear-item .gstat{font-size:9.5px}
   .locked-btn{flex:1;padding:7px 8px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);font-size:10px;letter-spacing:.1em;color:var(--muted-2);cursor:not-allowed}
@@ -599,8 +588,9 @@
   .gacha-result b{font-family:"Cinzel",serif;font-size:11px;line-height:1.25;color:#f0e8d6}
   .gacha-result .new{font-family:"Bebas Neue",sans-serif;font-size:14px;letter-spacing:.16em;color:var(--lime);text-shadow:0 0 12px rgba(255,230,163,.5)}
   .gacha-result .dup{font-size:9px;letter-spacing:.08em;color:var(--muted)}
-  .gacha-result.rar-SSR{border-color:rgba(255,214,106,.6);box-shadow:0 0 20px rgba(255,214,106,.12)}
-  .gacha-result.rar-SR{border-color:rgba(124,199,255,.45)}
+  .gacha-result.rar-legendary{border-color:rgba(255,214,106,.65);box-shadow:0 0 22px rgba(255,214,106,.18)}
+  .gacha-result.rar-epic{border-color:rgba(199,125,255,.5)}
+  .gacha-result.rar-rare{border-color:rgba(90,169,255,.4)}
 
   .dmg.hit{color:#e8e0c8;font-size:18px;text-shadow:0 0 8px rgba(232,224,200,.45),0 2px 6px rgba(0,0,0,.7)}
   .dmg.crit{color:#ffe27a;font-size:30px;text-shadow:0 0 14px rgba(255,214,106,.8),0 2px 8px rgba(0,0,0,.8)}
@@ -668,10 +658,6 @@
     background:radial-gradient(circle at 40% 35%,rgba(255,246,220,.5),rgba(233,196,106,.16));
     box-shadow:0 0 24px rgba(233,196,106,.3);
   }
-  body.touch .meter.od,body.touch .subline,body.touch #combo{display:none!important}
-  body.aim{cursor:none}
-  body.aim button{cursor:pointer}
-  body.auto #crosshair{opacity:0!important}
   /* ---------- boot ---------- */
   #boot{
     position:fixed;inset:0;z-index:20;background:#070b08;display:grid;place-items:center;
@@ -697,15 +683,12 @@
     .callsign .who b{font-size:18px}
     .callsign .hpnum{font-size:22px}
     .callsign .lv{display:none}
-    .subline #xpText{display:none}
     .hud-center{top:calc(112px + var(--safe-t));min-width:200px}
     .boss-bar{top:calc(166px + var(--safe-t));width:min(560px,84vw)}
     .stage-tag{display:none}
     .score-box b{font-size:32px}
     .hud-right .best-mini{display:none}
     .wave-chip b{font-size:21px}
-    #combo{bottom:calc(176px + var(--safe-b));left:calc(18px + var(--safe-l))}
-    #combo b{font-size:44px}
     #hint{bottom:calc(178px + var(--safe-b));max-width:88vw;gap:5px}
     #hint span{font-size:9px;padding:5px 7px}
     .howto{max-height:34vh;overflow-y:auto}
@@ -725,10 +708,8 @@
   <div id="webgl"></div>
   <div id="vignette" class="fx"></div>
   <div id="scan" class="fx"></div>
-  <div id="odfx" class="fx"></div>
   <div id="hurt" class="fx"></div>
 
-  <div id="crosshair" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
   <div id="dmgLayer" aria-hidden="true"></div>
   <div id="radarLayer" aria-hidden="true"></div>
 
@@ -742,11 +723,6 @@
       </div>
       <div class="meter hp"><div class="fill" id="hpFill"></div><div class="ticks"></div></div>
       <div class="meter xp"><div class="fill" id="xpFill"></div><div class="ticks"></div></div>
-      <div class="meter od" id="odMeter"><div class="fill" id="odFill"></div></div>
-      <div class="subline">
-        <span>FOCUS <b id="odPct">0%</b></span>
-        <span id="xpText">0 / 6 XP</span>
-      </div>
     </div>
 
     <div class="hud-center">
@@ -771,8 +747,7 @@
       <div class="gem-chip"><i>✦</i><b id="gemNum">0</b></div>
     </div>
 
-    <div id="combo"><span class="x">×</span><b id="comboNum">1.0</b><span class="lbl">COMBO</span></div>
-  </div>
+    </div>
 
   <div id="waveBanner">
     <div class="kicker" id="bannerKicker">INCOMING</div>
@@ -783,10 +758,7 @@
 
   <div id="hint">
     <span><b>WASD</b> 移動</span>
-    <span><b>MOUSE</b> 照準</span>
-    <span><b>CLICK</b> 射撃</span>
     <span><b>止まると自動射撃</b></span>
-    <span><b>E</b> 集中</span>
   </div>
 
   <div id="mobile">
@@ -807,12 +779,12 @@
       <div class="howto" id="howPanel">
         <h3>HOW TO HUNT</h3>
         <dl>
-          <dt>PC</dt><dd><b>WASD</b> 移動 / <b>マウス</b> 照準 / <b>左クリック</b> 射撃 / <b>E</b> 集中 / <b>P</b> ポーズ</dd>
-          <dt>スマホ</dt><dd>画面の触った場所に移動スティックが出現。ドラッグで移動し、指を離すと消えます。止まっている間は近くの魔物へ自動で射撃します（フォーカス・エイム・コンボはありません）。</dd>
+          <dt>PC</dt><dd><b>WASD</b> 移動 / <b>止まると自動射撃</b> / <b>P</b> ポーズ</dd>
+          <dt>スマホ</dt><dd>画面の触った場所に移動スティックが出現。ドラッグで移動し、指を離すと消えます。止まっている間は近くの魔物へ自動で射撃します。</dd>
           <dt>成長</dt><dd>魔物を倒すと<b>経験値の珠</b>が落ちます。回収してレベルアップすると、ランダムな3択の祝福を1つ獲得。弓は短弓 → 長弓 → 精霊の弓 → 竜骨の弓へ進化します。</dd>
           <dt>装備</dt><dd>装備は<b>星晶ガチャ</b>で獲得。星晶はステージクリアとボス撃破で貯まります。コインで装備をLv5まで強化でき、セット効果もあります。</dd>
         </dl>
-        <p>各ステージ30ウェーブ。5ウェーブごとに石の守護者、10ウェーブごとに竜が出現します。ウェーブを進めるほどコインを獲得し、タイトルの「装備」で武器・防具・護符を強化。セット効果とレベルアップの3択でビルドを組もう。集中ゲージが満ちたら <b>E</b> / FOCUS で時を遅くし、逆転の連射を決められます。ダメージは通常・会心・被ダメージ別に表示されます。</p>
+        <p>各ステージ30ウェーブ。5ウェーブごとに石の守護者、10ウェーブごとに竜が出現します。ウェーブを進めるほどコインを獲得し、タイトルの「装備」で武器・防具・護符を強化。セット効果とレベルアップの3択でビルドを組もう。ダメージは通常・会心・被ダメージ別に表示されます。</p>
       </div>
       <div class="title-stats">
         <div class="stat"><span>BEST SCORE</span><b id="bestScore">0</b></div>
@@ -878,13 +850,13 @@
       <div class="gacha-hero">
         <div class="gacha-hero-art" id="gachaHeroArt"></div>
         <div class="gacha-hero-info">
-          <div class="kicker">FEATURED // SSR</div>
+          <div class="kicker">FEATURED // LEGENDARY</div>
           <h3>竜骨の大弓</h3>
           <p>星晶で装備を召喚。武器・防具・護符は全9種。同じセットを揃えるとセット効果が発動します。重複した装備はコインに変換されます。</p>
-          <div class="gacha-rates">SSR 5% ・ SR 25% ・ R 70%<br>10回召喚は <b>SR以上1枠確定</b></div>
+          <div class="gacha-rates">LEGENDARY 5% ・ EPIC 25% ・ RARE 70%<br>10回召喚は <b>EPIC以上1枠確定</b></div>
           <div class="gacha-pull-row">
             <button class="pull-btn" id="btnPull1" type="button">1回召喚 <b>5✦</b></button>
-            <button class="pull-btn ten" id="btnPull10" type="button">10回召喚 <b>45✦</b><small>SR以上確定</small></button>
+            <button class="pull-btn ten" id="btnPull10" type="button">10回召喚 <b>45✦</b><small>EPIC以上確定</small></button>
           </div>
           <p class="gacha-note">星晶はステージクリア・ボス撃破で獲得できます。ログインボーナス／ミッションからの獲得はアプリ版で追加予定です。</p>
         </div>
@@ -950,12 +922,12 @@
 
   <section class="screen" id="screenLevel">
     <div class="level-wrap">
-      <div class="level-kicker">LEVEL UP // CHOOSE A BLESSING</div>
+      <div class="level-kicker">LEVEL UP // SLOT REVEAL</div>
       <h2 class="level-title">LEVEL <span id="levelUpNum">2</span></h2>
-      <p class="level-sub">3つの祝福からひとつ。このランだけの力を手に入れろ。</p>
+      <p class="level-sub">スロットを回して、3つの祝福からひとつ。</p>
       <div class="level-rule"></div>
       <div class="cards" id="upgradeCards"></div>
-      <div class="level-tip">1 / 2 / 3 キーでも選択できます</div>
+      <div class="level-tip" id="levelTip">回転中はタップでスキップ / 1・2・3キーで選択</div>
     </div>
   </section>
 
@@ -1000,18 +972,12 @@ const dom = {
   hpNum: $("#hpNum"),
   hpMeter: $(".meter.hp"),
   xpFill: $("#xpFill"),
-  xpText: $("#xpText"),
   levelNum: $("#levelNum"),
   lvChip: $("#lvChip"),
-  odFill: $("#odFill"),
-  odMeter: $("#odMeter"),
-  odPct: $("#odPct"),
   waveNum: $("#waveNum"),
   enemyNum: $("#enemyNum"),
   scoreNum: $("#scoreNum"),
   bestMini: $("#bestMini"),
-  combo: $("#combo"),
-  comboNum: $("#comboNum"),
   bossWrap: $("#bossWrap"),
   bossFill: $("#bossFill"),
   bossName: $("#bossName"),
@@ -1047,8 +1013,6 @@ const dom = {
   bannerSub: $("#bannerSub"),
   hint: $("#hint"),
   hurt: $("#hurt"),
-  odfx: $("#odfx"),
-  crosshair: $("#crosshair"),
   dmgLayer: $("#dmgLayer"),
   radarLayer: $("#radarLayer"),
   screenTitle: $("#screenTitle"),
@@ -1060,6 +1024,7 @@ const dom = {
   screenLevel: $("#screenLevel"),
   levelUpNum: $("#levelUpNum"),
   upgradeCards: $("#upgradeCards"),
+  levelTip: $("#levelTip"),
   bestScore: $("#bestScore"),
   bestWave: $("#bestWave"),
   howPanel: $("#howPanel"),
@@ -1292,13 +1257,6 @@ class SoundEngine {
     this.blip("sawtooth", 87, 55, 1.2, 0.08, t + 0.1, 320);
     this.noise(1.1, 0.09, 500, t + 0.12);
   }
-  sfxOD() {
-    if (!this.enabled) return;
-    const t = this.ctx ? this.ctx.currentTime : 0;
-    this.blip("sine", 180, 1200, 0.55, 0.09, t);
-    this.blip("sine", 240, 1600, 0.7, 0.05, t + 0.06);
-    this.noise(0.5, 0.06, 2600, t, "highpass");
-  }
   sfxOver() {
     if (!this.enabled) return;
     const t = this.ctx ? this.ctx.currentTime : 0;
@@ -1359,7 +1317,6 @@ let beams = [];
 let flashes = [];
 let dmgNums = [];
 let radarPool = [];
-let aimRing = null;
 let arenaDecor = null;
 
 let enemies = [];
@@ -1378,22 +1335,22 @@ const BOW_TIERS = [
 ];
 const UPGRADE_DEFS = [
   {
-    id: "power", name: "剛弓", glyph: "剛", rarity: "common", tag: "ATTACK", max: 10,
+    id: "power", name: "剛弓", glyph: "剛", rarity: "uncommon", tag: "ATTACK", max: 10,
     desc: "矢の攻撃力が +12% 上がる。",
     apply() { player.up.damage += 0.12; },
   },
   {
-    id: "haste", name: "早撃ち", glyph: "早", rarity: "common", tag: "ATTACK", max: 10,
+    id: "haste", name: "早撃ち", glyph: "早", rarity: "uncommon", tag: "ATTACK", max: 10,
     desc: "弓を引く速度が +10% 上がる。",
     apply() { player.up.rate += 0.10; },
   },
   {
-    id: "swift", name: "風の靴", glyph: "風", rarity: "common", tag: "MOVE", max: 5,
+    id: "swift", name: "風の靴", glyph: "風", rarity: "uncommon", tag: "MOVE", max: 5,
     desc: "移動速度が +6% 上がる。",
     apply() { player.up.speed += 0.06; },
   },
   {
-    id: "vitality", name: "生命の護符", glyph: "命", rarity: "common", tag: "LIFE", max: 8,
+    id: "vitality", name: "生命の護符", glyph: "命", rarity: "uncommon", tag: "LIFE", max: 8,
     desc: "最大HP +15。さらにHPを15回復する。",
     apply() {
       player.maxHp += 15;
@@ -1401,17 +1358,17 @@ const UPGRADE_DEFS = [
     },
   },
   {
-    id: "multishot", name: "連なり矢", glyph: "連", rarity: "rare", tag: "ATTACK", max: 2,
+    id: "multishot", name: "連なり矢", glyph: "連", rarity: "epic", tag: "ATTACK", max: 2,
     desc: "放つ矢が1本増える。1本あたりの威力は少し下がる。",
     apply() { player.up.multishot += 1; },
   },
   {
-    id: "pierce", name: "貫通の矢", glyph: "貫", rarity: "rare", tag: "ATTACK", max: 2,
+    id: "pierce", name: "貫通の矢", glyph: "貫", rarity: "epic", tag: "ATTACK", max: 2,
     desc: "矢が敵を1体貫通して飛び続ける。",
     apply() { player.up.pierce += 1; },
   },
   {
-    id: "homing", name: "導きの風", glyph: "導", rarity: "rare", tag: "ATTACK", max: 1,
+    id: "homing", name: "導きの風", glyph: "導", rarity: "epic", tag: "ATTACK", max: 1,
     desc: "矢が近くの敵を追尾する。ただし攻撃力 -20%。",
     apply() {
       player.up.homing = true;
@@ -1427,11 +1384,6 @@ const UPGRADE_DEFS = [
     id: "crit", name: "急所狙い", glyph: "会", rarity: "rare", tag: "ATTACK", max: 4,
     desc: "会心率が +8% 上がる。会心の矢は2倍のダメージ。",
     apply() { player.up.crit = Math.min(0.55, player.up.crit + 0.08); },
-  },
-  {
-    id: "focus", name: "集中の理", glyph: "集", rarity: "rare", tag: "SPIRIT", max: 3,
-    desc: "集中ゲージの獲得量が +20% 増える。",
-    apply() { player.up.focusGain *= 1.2; },
   },
 ];
 const STAGE_WAVES = 30;
@@ -1487,35 +1439,35 @@ const STAGES = [
 ];
 
 const GEAR_SETS = {
-  wanderer: { name: "旅人の支度", color: "#cfc8ae", b2: "最大HP +10", b3: "集中ゲージ獲得 +10%" },
+  wanderer: { name: "旅人の支度", color: "#cfc8ae", b2: "最大HP +10", b3: "移動速度 +5%" },
   forest: { name: "森の守り手", color: "#9fc45a", b2: "最大HP +20", b3: "自動射撃ダメージ +25%" },
   moon: { name: "月影の狩人", color: "#8fe8ff", b2: "移動速度 +8%", b3: "会心率 +10%" },
   dragon: { name: "竜骨の継承者", color: "#ff9a5a", b2: "攻撃力 +8%", b3: "矢の貫通 +1" },
 };
 const RARITY_INFO = {
-  N: { name: "N", color: "#b8c0b0", coin: 20 },
-  R: { name: "R", color: "#6ee7a8", coin: 60 },
-  SR: { name: "SR", color: "#7cc7ff", coin: 150 },
-  SSR: { name: "SSR", color: "#ffd66a", coin: 400 },
+  uncommon: { name: "UNCOMMON", color: "#6ee7a8", coin: 20 },
+  rare: { name: "RARE", color: "#5aa9ff", coin: 60 },
+  epic: { name: "EPIC", color: "#c77dff", coin: 150 },
+  legendary: { name: "LEGENDARY", color: "#ffd66a", coin: 400 },
 };
 const GEAR = {
   weapon: [
-    { id: "starter_bow", slot: "weapon", name: "旅人の短弓", set: "wanderer", tier: 0, rarity: "N", gacha: false, base: { damage: 0.02, rate: 0.01 }, desc: "攻撃 +2% / 連射 +1%" },
-    { id: "hunter_bow", slot: "weapon", name: "森人の狩弓", set: "forest", tier: 0, rarity: "R", gacha: true, base: { damage: 0.05, rate: 0.03 }, desc: "攻撃 +5% / 連射 +3%" },
-    { id: "moon_bow", slot: "weapon", name: "月影の反曲弓", set: "moon", tier: 1, rarity: "SR", gacha: true, base: { rate: 0.07, crit: 0.03 }, desc: "連射 +7% / 会心 +3%" },
-    { id: "bone_bow", slot: "weapon", name: "竜骨の大弓", set: "dragon", tier: 2, rarity: "SSR", gacha: true, base: { damage: 0.10, crit: 0.02 }, desc: "攻撃 +10% / 会心 +2%" },
+    { id: "starter_bow", slot: "weapon", name: "旅人の短弓", set: "wanderer", tier: 0, rarity: "uncommon", gacha: false, base: { damage: 0.02, rate: 0.01 }, desc: "攻撃 +2% / 連射 +1%" },
+    { id: "hunter_bow", slot: "weapon", name: "森人の狩弓", set: "forest", tier: 0, rarity: "rare", gacha: true, base: { damage: 0.05, rate: 0.03 }, desc: "攻撃 +5% / 連射 +3%" },
+    { id: "moon_bow", slot: "weapon", name: "月影の反曲弓", set: "moon", tier: 1, rarity: "epic", gacha: true, base: { rate: 0.07, crit: 0.03 }, desc: "連射 +7% / 会心 +3%" },
+    { id: "bone_bow", slot: "weapon", name: "竜骨の大弓", set: "dragon", tier: 2, rarity: "legendary", gacha: true, base: { damage: 0.10, crit: 0.02 }, desc: "攻撃 +10% / 会心 +2%" },
   ],
   armor: [
-    { id: "starter_vest", slot: "armor", name: "旅装のベスト", set: "wanderer", rarity: "N", gacha: false, base: { maxHp: 8 }, desc: "最大HP +8" },
-    { id: "leather_vest", slot: "armor", name: "森革のベスト", set: "forest", rarity: "R", gacha: true, base: { maxHp: 22 }, desc: "最大HP +22" },
-    { id: "moon_cloak", slot: "armor", name: "月影の外套", set: "moon", rarity: "SR", gacha: true, base: { speed: 0.08 }, desc: "移動 +8%" },
-    { id: "bone_plate", slot: "armor", name: "竜骨の胸甲", set: "dragon", rarity: "SSR", gacha: true, base: { maxHp: 14, damage: 0.03 }, desc: "最大HP +14 / 攻撃 +3%" },
+    { id: "starter_vest", slot: "armor", name: "旅装のベスト", set: "wanderer", rarity: "uncommon", gacha: false, base: { maxHp: 8 }, desc: "最大HP +8" },
+    { id: "leather_vest", slot: "armor", name: "森革のベスト", set: "forest", rarity: "rare", gacha: true, base: { maxHp: 22 }, desc: "最大HP +22" },
+    { id: "moon_cloak", slot: "armor", name: "月影の外套", set: "moon", rarity: "epic", gacha: true, base: { speed: 0.08 }, desc: "移動 +8%" },
+    { id: "bone_plate", slot: "armor", name: "竜骨の胸甲", set: "dragon", rarity: "legendary", gacha: true, base: { maxHp: 14, damage: 0.03 }, desc: "最大HP +14 / 攻撃 +3%" },
   ],
   charm: [
-    { id: "starter_charm", slot: "charm", name: "旅の木の実", set: "wanderer", rarity: "N", gacha: false, base: { maxHp: 6, focusGain: 0.02 }, desc: "最大HP +6 / 集中獲得 +2%" },
-    { id: "acorn_charm", slot: "charm", name: "森の木の実", set: "forest", rarity: "R", gacha: true, base: { maxHp: 12, focusGain: 0.05 }, desc: "最大HP +12 / 集中獲得 +5%" },
-    { id: "firefly_charm", slot: "charm", name: "蛍の護符", set: "moon", rarity: "SR", gacha: true, base: { crit: 0.05, speed: 0.02 }, desc: "会心 +5% / 移動 +2%" },
-    { id: "fang_charm", slot: "charm", name: "竜牙の護符", set: "dragon", rarity: "SSR", gacha: true, base: { damage: 0.06 }, desc: "攻撃 +6%" },
+    { id: "starter_charm", slot: "charm", name: "旅の木の実", set: "wanderer", rarity: "uncommon", gacha: false, base: { maxHp: 6, speed: 0.02 }, desc: "最大HP +6 / 移動 +2%" },
+    { id: "acorn_charm", slot: "charm", name: "森の木の実", set: "forest", rarity: "rare", gacha: true, base: { maxHp: 12, crit: 0.02 }, desc: "最大HP +12 / 会心 +2%" },
+    { id: "firefly_charm", slot: "charm", name: "蛍の護符", set: "moon", rarity: "epic", gacha: true, base: { crit: 0.05, speed: 0.02 }, desc: "会心 +5% / 移動 +2%" },
+    { id: "fang_charm", slot: "charm", name: "竜牙の護符", set: "dragon", rarity: "legendary", gacha: true, base: { damage: 0.06 }, desc: "攻撃 +6%" },
   ],
 };
 const GACHA_POOL = GEAR.weapon.concat(GEAR.armor, GEAR.charm).filter((g) => g.gacha);
@@ -1539,15 +1491,10 @@ const xpNextFor = (level) => Math.round(6 + level * 4 + level * level * 0.5);
 const game = {
   wave: 0,
   score: 0,
-  combo: 0,
-  comboTimer: 0,
   phase: "idle",      // idle | fight | break
   breakTimer: 0,
   spawnQueue: [],
   spawnDelay: 0,
-  od: 0,
-  odActive: false,
-  odTime: 0,
   shake: 0,
   dying: 0,
   hintTimer: 0,
@@ -1563,11 +1510,7 @@ const game = {
 
 const input = {
   keys: new Set(),
-  pointerX: innerWidth / 2,
-  pointerY: innerHeight / 2,
-  mouseDown: false,
   moveVec: { x: 0, y: 0 },
-  aimVec: { x: 0, y: 0, active: false },
   strip: false,
 };
 let aimPoint = null;
@@ -2842,7 +2785,7 @@ function buildPlayer() {
     up: {
       damage: 1, rate: 1, speed: 1, multishot: 0, pierce: 0,
       homing: false, lifesteal: 0, crit: 0.04,
-      focusGain: 1, autoDamage: 1, counts: {},
+      autoDamage: 1, counts: {},
     },
     bowTier: 0,
     aimAngle: 0, fireCd: 0, invuln: 0,
@@ -2852,32 +2795,6 @@ function buildPlayer() {
   };
   player.vel.set(0, 0, 0);
 
-  // aim reticle
-  const aimGroup = new THREE.Group();
-  const ringMat = new THREE.MeshBasicMaterial({
-    color: 0xffe6a3, transparent: true, opacity: 0.55,
-    blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide,
-  });
-  const ar = new THREE.Mesh(new THREE.RingGeometry(0.62, 0.7, 40), ringMat);
-  ar.rotation.x = -Math.PI / 2;
-  aimGroup.add(ar);
-  const dot = new THREE.Mesh(new THREE.CircleGeometry(0.07, 12), new THREE.MeshBasicMaterial({
-    color: 0xfffbee, transparent: true, opacity: 0.8,
-    blending: THREE.AdditiveBlending, depthWrite: false,
-  }));
-  dot.rotation.x = -Math.PI / 2;
-  aimGroup.add(dot);
-  for (let i = 0; i < 4; i++) {
-    const a = (i / 4) * TAU;
-    const tick = new THREE.Mesh(new THREE.PlaneGeometry(0.05, 0.3), ringMat);
-    tick.rotation.x = -Math.PI / 2;
-    tick.rotation.z = -a;
-    tick.position.set(Math.cos(a) * 0.95, 0, Math.sin(a) * 0.95);
-    aimGroup.add(tick);
-  }
-  aimGroup.position.y = 0.03;
-  scene.add(aimGroup);
-  aimRing = aimGroup;
 }
 
 function applyBowTierVisuals() {
@@ -3000,8 +2917,6 @@ function buildEnemyAssets() {
   EG.arrowTipMats = BOW_TIERS.map((tier) => new THREE.MeshBasicMaterial({
     color: tier.glow > 0.3 ? 0xffe6a3 : 0xd8d2c0,
   }));
-  EG.arrowFocusMat = new THREE.MeshBasicMaterial({ color: 0xffe6a3 });
-  EG.arrowFocusTipMat = new THREE.MeshBasicMaterial({ color: 0xfff6d0 });
 
   EG.pickupGeo = new THREE.BoxGeometry(0.28, 0.28, 0.28);
   EG.pickupOcta = new THREE.OctahedronGeometry(0.34, 0);
@@ -3387,7 +3302,7 @@ function stageBossName(type) {
 }
 
 function updateEnemies(dt, t) {
-  const eScale = game.odActive ? 0.42 : 1;
+  const eScale = 1;
   const edt = dt * eScale;
   const px = player.pos.x;
   const pz = player.pos.z;
@@ -3828,7 +3743,6 @@ function bossDefeated(e) {
   }
   spawnPickup("hp", e.pos.x - 2, e.pos.z);
   spawnPickup("hp", e.pos.x + 2, e.pos.z + 1);
-  spawnPickup("od", e.pos.x, e.pos.z - 2);
   dom.bossWrap.classList.remove("on");
   banner(`${stageBossName(e.type)} DOWN`, "THE FOREST BREATHES", "BOSS", 2.8);
   audio.sfxWave();
@@ -3839,10 +3753,9 @@ function bossDefeated(e) {
    ARROWS
    ============================================================ */
 function makePlayerArrow(angle) {
-  const focus = game.odActive;
   const tier = player.bowTier;
-  const mat = focus ? EG.arrowFocusMat : EG.arrowMats[tier];
-  const tipMat = focus ? EG.arrowFocusTipMat : EG.arrowTipMats[tier];
+  const mat = EG.arrowMats[tier];
+  const tipMat = EG.arrowTipMats[tier];
   const group = new THREE.Group();
   const shaft = new THREE.Mesh(EG.arrowShaft, mat);
   shaft.rotation.x = Math.PI / 2;
@@ -3887,9 +3800,9 @@ function makePlayerArrow(angle) {
     }
     const b = {
       mesh: g, vx, vz, life: 1.45, angle: ang,
-      dmg: 22 * player.up.damage * tierBonus * (focus ? 1.25 : 1) * Math.pow(0.78, player.up.multishot) * (player.autoFire ? player.up.autoDamage : 1),
+      dmg: 22 * player.up.damage * tierBonus * Math.pow(0.78, player.up.multishot) * (player.autoFire ? player.up.autoDamage : 1),
       radius: 0.3,
-      pierce: player.up.pierce + (focus ? 1 : 0),
+      pierce: player.up.pierce,
       hitSet: new Set(),
       homing: player.up.homing,
       crit: player.up.crit,
@@ -3899,7 +3812,7 @@ function makePlayerArrow(angle) {
   }
   player.group.updateMatrixWorld(true);
   const mp = player.bow.getWorldPosition(scratchAim.muzzle || (scratchAim.muzzle = new THREE.Vector3()));
-  flashAt(mp.x, mp.y, mp.z, focus ? 0xffe6a3 : 0x9fffc0, 1.5, 0.08);
+  flashAt(mp.x, mp.y, mp.z, 0x9fffc0, 1.5, 0.08);
   audio.sfxShoot();
   addShake(0.03);
   return volley;
@@ -3931,7 +3844,7 @@ function removePBullet(i) {
 }
 
 function updateBullets(dt) {
-  const eScale = game.odActive ? 0.45 : 1;
+  const eScale = 1;
   const pr = 0.6;
 
   for (let i = pBullets.length - 1; i >= 0; i--) {
@@ -4050,10 +3963,6 @@ function hurtEnemy(e, dmg, hx, hz, crit) {
   if (e.hp <= 0) {
     killEnemy(e, true);
   } else {
-    if (!useTouchUI) {
-      dom.crosshair.classList.add("hit");
-      game.crossT = 0.07;
-    }
     audio.sfxHit();
   }
 }
@@ -4070,13 +3979,7 @@ function killEnemy(e, byPlayer) {
 
   if (byPlayer) {
     game.totalKills++;
-    if (!useTouchUI) {
-      game.combo++;
-      game.comboTimer = 3.2;
-      updateComboUI();
-    }
     addScore(e.score, e.pos.x, e.pos.y + 1.6, e.pos.z, isBossType(e.type) ? "gold" : "");
-    gainOD((isBossType(e.type) ? 40 : e.type === "golem" ? 12 : 6) * player.up.focusGain);
     if (player.up.lifesteal > 0) {
       const heal = player.up.lifesteal;
       player.hp = Math.min(player.maxHp, player.hp + heal);
@@ -4092,7 +3995,6 @@ function killEnemy(e, byPlayer) {
 function maybeDrop(e) {
   const roll = Math.random();
   if (roll < 0.08) spawnPickup("hp", e.pos.x, e.pos.z);
-  else if (roll < 0.17) spawnPickup("od", e.pos.x, e.pos.z);
 }
 
 /* ============================================================
@@ -4154,15 +4056,10 @@ function updatePickups(dt, t) {
       g.position.z += (dz / (dist || 1)) * pull;
     }
     if (dist < 1.35 && player.alive) {
-      if (p.kind === "hp") {
-        player.hp = Math.min(player.maxHp, player.hp + 28);
-        damageText(g.position.x, 2.2, g.position.z, "+28 HP", "cyan");
-      } else {
-        gainOD(26 * player.up.focusGain);
-        damageText(g.position.x, 2.2, g.position.z, "+26 FOCUS", "gold");
-      }
-      spawnParticles(g.position.x, 1.05, g.position.z, p.kind === "hp" ? 0xff8a6a : 0xffd06a, 12, 5, 1.1, 0.45, 5);
-      flashAt(g.position.x, 1.05, g.position.z, p.kind === "hp" ? 0xff8a6a : 0xffd06a, 3, 0.18);
+      player.hp = Math.min(player.maxHp, player.hp + 28);
+      damageText(g.position.x, 2.2, g.position.z, "+28 HP", "cyan");
+      spawnParticles(g.position.x, 1.05, g.position.z, 0xff8a6a, 12, 5, 1.1, 0.45, 5);
+      flashAt(g.position.x, 1.05, g.position.z, 0xff8a6a, 3, 0.18);
       audio.sfxPickup();
       scene.remove(g);
       pickups.splice(i, 1);
@@ -4237,12 +4134,13 @@ function updateXpUI() {
   if (!player) return;
   const pct = clamp((player.xp / Math.max(1, player.xpNext)) * 100, 0, 100);
   dom.xpFill.style.width = pct + "%";
-  dom.xpText.textContent = `${Math.floor(player.xp)} / ${player.xpNext} XP`;
   dom.levelNum.textContent = player.level;
   dom.lvChip.textContent = "LV " + player.level;
 }
 
 let activeChoices = [];
+let slotRolling = false;
+let slotTimer = null;
 let gearReturn = "title";
 let gachaReturn = "title";
 const NUMERALS = ["1", "2", "3"];
@@ -4255,7 +4153,7 @@ function makeBowCard() {
       ? "長弓が精霊の弓に進化。攻撃力と連射速度が上がる。"
       : "精霊の弓が竜骨の弓に進化。攻撃力と貫通性能が上がる。";
   return {
-    id: "bow", name: `弓の進化：${next.name}`, glyph: "弓", rarity: "epic", tag: "WEAPON · EVOLUTION",
+    id: "bow", name: `弓の進化：${next.name}`, glyph: "弓", rarity: player.bowTier >= 2 ? "legendary" : "epic", tag: "WEAPON · EVOLUTION",
     desc, apply() {
       player.bowTier += 1;
       if (player.bowTier === 1) {
@@ -4273,8 +4171,49 @@ function makeBowCard() {
   };
 }
 
+
+function upgradeArtSVG(card) {
+  const info = RARITY_INFO[card.rarity] || RARITY_INFO.uncommon;
+  const col = info.color;
+  const icons = {
+    power: '<path d="M20 46 C10 34 16 16 28 10 C24 24 27 36 36 46"/><path d="M16 30 H46"/><path d="M46 30 l-6 -4 M46 30 l-6 4"/>',
+    haste: '<path d="M14 22 H38 M14 32 H46 M14 42 H32"/><path d="M32 17 l6 5 -6 5"/><path d="M40 27 l6 5 -6 5"/>',
+    swift: '<path d="M20 18 C33 17 44 25 47 39 C34 39 23 32 20 18Z"/><path d="M14 46 C23 40 33 40 41 45"/><path d="M18 36 H32"/>',
+    vitality: '<path d="M32 49 C17 38 15 28 21 23 C27 18 32 23 32 28 C32 23 37 18 43 23 C49 28 47 38 32 49Z"/><path d="M32 29 V43"/>',
+    multishot: '<path d="M32 50 V18"/><path d="M32 18 l-5 7 M32 18 l5 7"/><path d="M22 50 L15 27 M42 50 L49 27"/><path d="M15 27 l-1 7 6 -3 M49 27 l1 7 -6 -3"/>',
+    pierce: '<path d="M32 14 L47 23 L43 44 L32 51 L21 44 L17 23Z"/><path d="M38 20 L24 34"/><path d="M38 20 l-7 1 6 6Z"/>',
+    homing: '<path d="M14 43 C18 24 38 18 48 31"/><path d="M48 31 l-7 -2 3 7"/><circle cx="14" cy="43" r="2" fill="'+col+'"/>',
+    lifesteal: '<path d="M24 17 C21 31 25 44 32 49 C39 44 43 31 40 17 C36 25 28 25 24 17Z"/><path d="M32 27 V40"/>',
+    crit: '<circle cx="32" cy="32" r="12"/><circle cx="32" cy="32" r="3" fill="'+col+'"/><path d="M32 11 V19 M32 45 V53 M11 32 H19 M45 32 H53"/>',
+    bow: '<path d="M20 52 C7 37 11 17 27 10 C23 25 25 40 35 51Z"/><path d="M20 52 L35 51"/><path d="M35 51 l-2 -7 7 1Z"/><path d="M27 10 L20 52"/>',
+  };
+  const icon = icons[card.id] || '<path d="M32 13 L36 27 L50 31 L36 35 L32 49 L28 35 L14 31 L28 27 Z"/>';
+  return '<svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="29" fill="'+col+'" fill-opacity=".07" stroke="'+col+'" stroke-opacity=".32"/><circle cx="32" cy="32" r="24" fill="none" stroke="'+col+'" stroke-opacity=".12"/><g fill="none" stroke="'+col+'" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">'+icon+'</g></svg>';
+}
+
+function slotStripHTML() {
+  const ids = ["power","haste","swift","vitality","crit","lifesteal","multishot","pierce","homing","bow"];
+  const rarities = ["uncommon","rare","epic","legendary"];
+  let html = '<div class="slot-roll" aria-hidden="true"><div class="slot-strip">';
+  for (let i = 0; i < 6; i++) {
+    html += '<span>' + upgradeArtSVG({ id: pick(ids), rarity: pick(rarities) }) + '</span>';
+  }
+  return html + '</div></div>';
+}
+
+function finishSlot() {
+  if (!slotRolling) return;
+  slotRolling = false;
+  clearTimeout(slotTimer);
+  slotTimer = null;
+  dom.upgradeCards.classList.remove("spinning");
+  dom.upgradeCards.classList.add("revealed");
+  if (dom.levelTip) dom.levelTip.textContent = "1 / 2 / 3 キーでも選択できます";
+  audio.blip("sine", 420, 840, 0.18, 0.04);
+}
+
 function buildUpgradeChoices() {
-  const pool = UPGRADE_DEFS.filter((def) => (player.up.counts[def.id] || 0) < def.max && !(useTouchUI && def.id === "focus"));
+  const pool = UPGRADE_DEFS.filter((def) => (player.up.counts[def.id] || 0) < def.max);
   const choices = [];
   const bowLevels = [2, 5, 8];
   if (player.bowTier < 3 && player.level >= bowLevels[player.bowTier]) {
@@ -4286,26 +4225,36 @@ function buildUpgradeChoices() {
     if (choices.some((c) => c.id === def.id)) continue;
     choices.push(def);
   }
-  // fallback (shouldn't happen)
   let extra = 0;
   while (choices.length < 3) {
     choices.push(UPGRADE_DEFS.find((d) => d.id === "vitality"));
     if (++extra > 3) break;
   }
   activeChoices = choices.slice(0, 3);
+  const strips = activeChoices.map(() => slotStripHTML());
   dom.upgradeCards.innerHTML = activeChoices.map((c, i) => `
     <button class="card ${c.rarity}" type="button" data-index="${i}" style="animation-delay:${i * 60}ms">
+      ${strips[i]}
       <span class="keys">${NUMERALS[i]}</span>
       ${c.id === "bow" ? '<span class="new-badge">EVOLVE</span>' : ""}
-      <span class="glyph">${c.glyph}</span>
-      <span class="rarity">${c.rarity.toUpperCase()}</span>
+      <span class="card-art">${upgradeArtSVG(c)}</span>
+      <span class="rarity">${(RARITY_INFO[c.rarity] || RARITY_INFO.uncommon).name}</span>
       <h3>${c.name}</h3>
       <p>${c.desc}</p>
       <span class="card-tag">${c.tag}</span>
     </button>
   `).join("");
+  dom.upgradeCards.classList.remove("revealed");
+  dom.upgradeCards.classList.add("spinning");
+  if (dom.levelTip) dom.levelTip.textContent = "回転中… タップでスキップ";
+  slotRolling = true;
+  clearTimeout(slotTimer);
+  slotTimer = setTimeout(finishSlot, 1080);
   dom.upgradeCards.querySelectorAll(".card").forEach((btn) => {
-    btn.addEventListener("click", () => chooseUpgrade(Number(btn.dataset.index)));
+    btn.addEventListener("click", () => {
+      if (slotRolling) { finishSlot(); return; }
+      chooseUpgrade(Number(btn.dataset.index));
+    });
   });
 }
 
@@ -4321,10 +4270,8 @@ function triggerLevelUp() {
   dom.levelUpNum.textContent = player.level;
   dom.screenLevel.classList.add("on");
   hideRadar();
-  input.mouseDown = false;
   input.keys.clear();
   input.moveVec.x = input.moveVec.y = 0;
-  input.aimVec.active = false;
   buildUpgradeChoices();
   updateXpUI();
   dom.hpFill.style.width = clamp((player.hp / player.maxHp) * 100, 0, 100) + "%";
@@ -4334,6 +4281,7 @@ function triggerLevelUp() {
 
 function chooseUpgrade(i) {
   if (state !== "levelup") return;
+  if (slotRolling) finishSlot();
   const card = activeChoices[i];
   if (!card) return;
   card.apply();
@@ -4438,20 +4386,10 @@ function startWave(n) {
 }
 
 function addScore(base, x, y, z, cls) {
-  const mult = comboMult();
-  const gain = Math.round(base * mult * (game.odActive ? 1.2 : 1));
+  const gain = Math.round(base);
   game.score += gain;
   damageText(x, y, z, "+" + fmt(gain), cls);
   dom.scoreNum.textContent = fmt(game.score);
-}
-
-function comboMult() {
-  return useTouchUI ? 1 : 1 + Math.min(game.combo, 30) * 0.08;
-}
-
-function gainOD(v) {
-  if (useTouchUI || game.odActive) return;
-  game.od = clamp(game.od + v, 0, 100);
 }
 
 function addShake(v) {
@@ -4464,8 +4402,6 @@ function hurtPlayer(amount, sx, sz) {
   player.hp = Math.max(0, player.hp - scaled);
   player.invuln = 0.7;
   game.hurtFlash = 0.32;
-  game.combo = 0;
-  game.comboTimer = 0;
   addShake(0.55);
   audio.sfxHurt();
   const dx = player.pos.x - sx;
@@ -4475,7 +4411,6 @@ function hurtPlayer(amount, sx, sz) {
   player.vel.z += (dz / d) * 7;
   spawnParticles(player.pos.x, 1.3, player.pos.z, 0xff5a6a, 14, 7, 1.2, 0.45, 9);
   damageText(player.pos.x + rand(-0.3, 0.3), 2.55, player.pos.z + rand(-0.3, 0.3), String(Math.round(scaled)), "hurt");
-  updateComboUI();
   if (player.hp <= 0) playerDie();
 }
 
@@ -4494,9 +4429,8 @@ function playerDie() {
   shockwave(player.pos.x, player.pos.z, 0.6, 8, 0xffe6a3, 0.75);
   flashAt(player.pos.x, 1.5, player.pos.z, 0xffffff, 12, 0.4);
   audio.sfxOver();
-  if (aimRing) aimRing.visible = false;
   hideRadar();
-  document.body.classList.remove("touch", "aim", "auto");
+  document.body.classList.remove("touch");
   if (player.locator) player.locator.visible = false;
   dom.mobile.style.display = "none";
 }
@@ -4523,8 +4457,6 @@ function finishStage() {
 function showResults(cleared, bonus, unlocked, gems) {
   endFloatStick();
   state = "over";
-  game.odActive = false;
-  dom.odfx.classList.remove("on");
   const stageBest = save.stageBest[game.stage] || 0;
   if (game.wave > stageBest) save.stageBest[game.stage] = game.wave;
   const newBest = game.score > save.best;
@@ -4558,7 +4490,7 @@ function showResults(cleared, bonus, unlocked, gems) {
   dom.ovUnlock.textContent = note.join("  //  ");
   dom.ovUnlock.classList.toggle("on", cleared);
 
-  document.body.classList.remove("playing", "aim", "levelup", "auto", "touch");
+  document.body.classList.remove("playing", "levelup", "touch");
   dom.screenLevel.classList.remove("on");
   dom.screenOver.classList.add("on");
   dom.hint.classList.remove("on");
@@ -4606,43 +4538,11 @@ function nearestEnemy(maxDist) {
   return best;
 }
 
-function updateAim() {
-  if (input.aimVec.active) {
-    const l = Math.hypot(input.aimVec.x, input.aimVec.y);
-    if (l > 0.001) {
-      aimDir.set(input.aimVec.x / l, 0, input.aimVec.y / l);
-      aimPoint.copy(player.pos).addScaledVector(aimDir, 10);
-      aimPoint.y = 0.1;
-      return true;
-    }
-  }
-  if (useTouchUI) return false;
-  const ndc = scratchAim.ndc || (scratchAim.ndc = new THREE.Vector2());
-  ndc.set((input.pointerX / innerWidth) * 2 - 1, -(input.pointerY / innerHeight) * 2 + 1);
-  const ray = scratchAim.ray || (scratchAim.ray = new THREE.Raycaster());
-  const plane = scratchAim.plane || (scratchAim.plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -1.4));
-  const hit = scratchAim.hit || (scratchAim.hit = new THREE.Vector3());
-  ray.setFromCamera(ndc, camera);
-  if (!ray.ray.intersectPlane(plane, hit)) return false;
-  aimPoint.copy(hit);
-  aimDir.set(hit.x - player.pos.x, 0, hit.z - player.pos.z);
-  const l = aimDir.length();
-  if (l < 0.001) return false;
-  aimDir.multiplyScalar(1 / l);
-  return true;
-}
-
 function updatePlayer(dt, t) {
   if (!player.alive) return;
   player.fireCd -= dt;
   player.invuln = Math.max(0, player.invuln - dt);
   if (player.recoil > 0) player.recoil = Math.max(0, player.recoil - dt * 2.4);
-
-  if (game.odActive) {
-    game.odTime -= dt;
-    game.od = clamp((game.odTime / 8) * 100, 0, 100);
-    if (game.odTime <= 0) endFocus();
-  }
 
   const mv = getMoveDir();
   const speed = 7.4 * player.up.speed;
@@ -4673,16 +4573,12 @@ function updatePlayer(dt, t) {
   const moveMag = Math.hypot(mv.x, mv.z);
   const velMag = Math.hypot(player.vel.x, player.vel.z);
   const stationary = moveMag < 0.12 && velMag < 1.5;
-  const manual = input.mouseDown || input.aimVec.active;
   let aiming = false;
   let firing = false;
   player.autoFire = false;
   player.target = null;
 
-  if (manual) {
-    aiming = updateAim();
-    firing = aiming;
-  } else if (stationary) {
+  if (stationary) {
     const target = nearestEnemy(30);
     if (target) {
       player.target = target;
@@ -4714,7 +4610,7 @@ function updatePlayer(dt, t) {
   if (firing && player.fireCd <= 0) {
     const shootAngle = aiming ? Math.atan2(aimDir.x, aimDir.z) : player.group.rotation.y;
     makePlayerArrow(shootAngle);
-    player.fireCd = (0.52 / player.up.rate) * (game.odActive ? 0.62 : 1);
+    player.fireCd = 0.52 / player.up.rate;
     player.recoil = 0.24;
   }
 
@@ -4735,55 +4631,15 @@ function updatePlayer(dt, t) {
   player.rig.position.y = Math.abs(Math.sin(player.walk)) * 0.055 * w + Math.sin(t * 1.8) * 0.012;
   player.rig.rotation.z = Math.sin(player.walk) * 0.018 * w;
   if (player.aura) {
-    player.aura.material.opacity = 0.11 + Math.sin(t * 3.2) * 0.03 + (game.odActive ? 0.12 : 0);
-    const as = game.odActive ? 4.6 : 3.4;
-    player.aura.scale.set(as, as, 1);
+    player.aura.material.opacity = 0.11 + Math.sin(t * 3.2) * 0.03;
+    player.aura.scale.set(3.4, 3.4, 1);
   }
   if (player.locator) {
     player.locator.rotation.z += dt * 0.5;
     player.locator.material.opacity = 0.26 + Math.sin(t * 4) * 0.08;
-    player.locator.material.color.setHex(game.odActive ? 0xffe6a3 : 0xe9c46a);
+    player.locator.material.color.setHex(0xe9c46a);
   }
   player.rig.visible = player.invuln > 0 ? Math.floor(t * 22) % 2 === 0 : true;
-  document.body.classList.toggle("auto", player.autoFire);
-
-  if (aimRing) {
-    const distAim = Math.hypot(aimPoint.x - player.pos.x, aimPoint.z - player.pos.z);
-    const show = aiming && state === "playing" && player.alive && distAim > 1.6;
-    aimRing.visible = show;
-    if (show) {
-      const ax = clamp(aimPoint.x, -37, 37);
-      const az = clamp(aimPoint.z, -37, 37);
-      aimRing.position.set(ax, 0.045, az);
-      aimRing.rotation.y += dt * 0.9;
-      const s = 1 + Math.sin(t * 7) * 0.06;
-      aimRing.scale.set(s, s, s);
-    }
-  }
-}
-
-function tryFocus() {
-  if (useTouchUI) return;
-  if (state !== "playing" || !player.alive || game.odActive || game.od < 99.5) return;
-  game.odActive = true;
-  game.odTime = 8;
-  game.od = 100;
-  dom.odfx.classList.add("on");
-  audio.sfxOD();
-  banner("FOCUS", "THE WORLD HOLDS ITS BREATH", "SPIRIT", 1.9);
-  addShake(0.4);
-  shockwave(player.pos.x, player.pos.z, 1, 14, 0xffe6a3, 0.8);
-  shockwave(player.pos.x, player.pos.z, 0.5, 8, 0x9fffaa, 0.6, 0.06);
-  spawnParticles(player.pos.x, 1.5, player.pos.z, 0xffe6a3, 26, 11, 1.6, 0.85, 4);
-  flashAt(player.pos.x, 1.5, player.pos.z, 0xffffff, 9, 0.3);
-}
-
-function endFocus() {
-  game.odActive = false;
-  game.od = 0;
-  game.odTime = 0;
-  dom.odfx.classList.remove("on");
-  audio.blip("sine", 640, 180, 0.3, 0.05);
 }
 
 /* ============================================================
@@ -4828,8 +4684,6 @@ function updateWaves(dt) {
     beamFlash(player.pos.x, player.pos.z, 0x9fffaa, 0.9, 1.5);
     flashAt(player.pos.x, 1.4, player.pos.z, 0x9fffaa, 5.5, 0.4);
     shockwave(player.pos.x, player.pos.z, 0.5, 5, 0x9fffaa, 0.6);
-    const pos = pickSpawnPos(8);
-    spawnPickup("od", pos.x, pos.z);
   }
 }
 
@@ -4954,23 +4808,11 @@ function updateTitleScene(dt, t) {
     player.locator.rotation.z += dt * 0.6;
     player.locator.material.opacity = 0.24 + Math.sin(t * 3) * 0.07;
   }
-  if (aimRing) aimRing.visible = false;
-  document.body.classList.remove("auto");
 }
 
 /* ============================================================
    HUD
    ============================================================ */
-function updateComboUI() {
-  if (useTouchUI) {
-    dom.combo.classList.remove("on");
-    return;
-  }
-  const on = game.combo > 0 && game.comboTimer > 0;
-  dom.combo.classList.toggle("on", on);
-  dom.comboNum.textContent = comboMult().toFixed(1);
-}
-
 function updateHud(dt) {
   if (!player) return;
   const hpPct = clamp((player.hp / player.maxHp) * 100, 0, 100);
@@ -4978,20 +4820,7 @@ function updateHud(dt) {
   dom.hpNum.textContent = String(Math.ceil(player.hp));
   dom.hpMeter.classList.toggle("low", player.hp <= 35);
 
-  dom.odFill.style.width = game.od + "%";
-  dom.odPct.textContent = Math.round(game.od) + "%";
-  const odReady = game.od >= 99.5 && !game.odActive;
-  dom.odMeter.classList.toggle("ready", odReady);
-  dom.odfx.classList.toggle("on", game.odActive);
   updateXpUI();
-
-  if (game.comboTimer > 0) {
-    game.comboTimer -= dt;
-    if (game.comboTimer <= 0) {
-      game.combo = 0;
-      updateComboUI();
-    }
-  }
 
   let boss = null;
   for (const e of enemies) {
@@ -5011,11 +4840,6 @@ function updateHud(dt) {
     dom.hurt.style.opacity = String(clamp(game.hurtFlash / 0.32, 0, 1) * 0.85);
   } else {
     dom.hurt.style.opacity = "0";
-  }
-
-  if (game.crossT > 0) {
-    game.crossT -= dt;
-    if (game.crossT <= 0) dom.crosshair.classList.remove("hit");
   }
 
   if (game.hintTimer > 0) {
@@ -5062,6 +4886,10 @@ function clearRun() {
   for (const o of xpOrbs) scene.remove(o.group);
   xpOrbs = [];
   activeChoices = [];
+  slotRolling = false;
+  clearTimeout(slotTimer);
+  slotTimer = null;
+  dom.upgradeCards.classList.remove("spinning", "revealed");
   dom.upgradeCards.innerHTML = "";
   dom.screenLevel.classList.remove("on");
   document.body.classList.remove("levelup");
@@ -5075,19 +4903,13 @@ function resetRun() {
   clearRun();
   game.wave = 0;
   game.score = 0;
-  game.combo = 0;
-  game.comboTimer = 0;
   game.phase = "break";
   game.breakTimer = 1.5;
   game.spawnDelay = 0;
-  game.od = 0;
-  game.odActive = false;
-  game.odTime = 0;
   game.shake = 0;
   game.dying = 0;
   game.hintTimer = 6.5;
   game.hurtFlash = 0;
-  game.crossT = 0;
   game.runTime = 0;
   game.totalKills = 0;
   game.bossAlive = false;
@@ -5105,7 +4927,7 @@ function resetRun() {
   player.up = {
     damage: 1, rate: 1, speed: 1, multishot: 0, pierce: 0,
     homing: false, lifesteal: 0, crit: 0.04,
-    focusGain: 1, autoDamage: 1, counts: {},
+    autoDamage: 1, counts: {},
   };
   player.maxHp = 120;
   player.hp = 120;
@@ -5127,13 +4949,7 @@ function resetRun() {
 
   dom.scoreNum.textContent = "0";
   dom.waveNum.textContent = "00";
-  dom.combo.classList.remove("on");
-  dom.comboNum.textContent = "1.0";
   dom.hpFill.style.width = "100%";
-  dom.odFill.style.width = "0%";
-  dom.odPct.textContent = "0%";
-  dom.odMeter.classList.remove("ready");
-  dom.odfx.classList.remove("on");
   dom.hurt.style.opacity = "0";
   dom.enemyNum.textContent = "0";
   updateXpUI();
@@ -5166,15 +4982,11 @@ function startStage(index) {
   state = "playing";
   document.body.classList.add("playing");
   document.body.classList.toggle("touch", useTouchUI);
-  document.body.classList.toggle("aim", !useTouchUI);
   dom.mobile.style.display = "";
   dom.hint.innerHTML = useTouchUI ? HINT_TOUCH : HINT_DESKTOP;
   dom.hint.classList.toggle("on", !useTouchUI);
-  input.mouseDown = false;
   input.keys.clear();
   input.moveVec.x = input.moveVec.y = 0;
-  input.aimVec.active = false;
-  input.aimVec.x = input.aimVec.y = 0;
   game.breakTimer = 2.2;
   banner(stage.en, stage.name, `STAGE ${String(stage.id + 1).padStart(2, "0")}`, 2.4);
   updateCoinUI();
@@ -5192,9 +5004,6 @@ function quitToTitle() {
   game.phase = "idle";
   game.score = 0;
   game.wave = 0;
-  game.combo = 0;
-  game.od = 0;
-  game.odActive = false;
   game.hintTimer = 0;
   game.runCoins = 0;
   player.alive = true;
@@ -5205,7 +5014,6 @@ function quitToTitle() {
   player.group.rotation.y = 0;
   player.invuln = 0;
   if (player.locator) player.locator.visible = true;
-  dom.odfx.classList.remove("on");
   dom.hurt.style.opacity = "0";
   dom.screenPause.classList.remove("on");
   dom.screenOver.classList.remove("on");
@@ -5218,7 +5026,7 @@ function quitToTitle() {
   dom.hint.classList.remove("on");
   dom.bossWrap.classList.remove("on");
   dom.mobile.style.display = "none";
-  document.body.classList.remove("playing", "aim", "touch", "levelup", "auto");
+  document.body.classList.remove("playing", "touch", "levelup");
   updateBestUI();
   updateCoinUI();
 }
@@ -5304,13 +5112,12 @@ function gearStatsText(stats) {
   if (stats.speed) parts.push(`移動 +${Math.round(stats.speed * 100)}%`);
   if (stats.maxHp) parts.push(`HP +${Math.round(stats.maxHp)}`);
   if (stats.crit) parts.push(`会心 +${Math.round(stats.crit * 100)}%`);
-  if (stats.focusGain) parts.push(`集中 +${Math.round(stats.focusGain * 100)}%`);
   if (stats.pierce) parts.push(`貫通 +${Math.round(stats.pierce)}`);
   return parts.join(" / ");
 }
 function applyLoadout() {
   if (!player) return;
-  const stats = { damage: 0, rate: 0, speed: 0, maxHp: 0, crit: 0, focusGain: 0, pierce: 0 };
+  const stats = { damage: 0, rate: 0, speed: 0, maxHp: 0, crit: 0, pierce: 0 };
   for (const slot of GEAR_SLOTS) {
     const item = equippedItem(slot);
     const scaled = gearScaledStats(item, gearLevel(item.id));
@@ -5320,12 +5127,11 @@ function applyLoadout() {
   player.up.rate *= 1 + stats.rate;
   player.up.speed *= 1 + stats.speed;
   player.up.crit += stats.crit;
-  player.up.focusGain += stats.focusGain;
   player.up.pierce += Math.round(stats.pierce || 0);
   player.maxHp = 120 + Math.round(stats.maxHp || 0);
   const counts = setCounts();
   if (counts.wanderer >= 2) player.maxHp += 10;
-  if (counts.wanderer >= 3) player.up.focusGain += 0.1;
+  if (counts.wanderer >= 3) player.up.speed += 0.05;
   if (counts.forest >= 2) player.maxHp += 20;
   if (counts.forest >= 3) player.up.autoDamage *= 1.25;
   if (counts.moon >= 2) player.up.speed *= 1.08;
@@ -5342,7 +5148,7 @@ function applyLoadout() {
 
 function gearArtSVG(item) {
   const set = GEAR_SETS[item.set] || GEAR_SETS.wanderer;
-  const rare = RARITY_INFO[item.rarity] || RARITY_INFO.N;
+  const rare = RARITY_INFO[item.rarity] || RARITY_INFO.uncommon;
   const c = set.color;
   const r = rare.color;
   const emblem = item.set === "forest"
@@ -5376,17 +5182,43 @@ function gearArtSVG(item) {
       ${emblem}
       <path d="M36 32 L50 46 M84 32 L70 46" stroke="${r}" stroke-width="1" opacity=".5"/>`;
   }
-  const sparkles = item.rarity === "SSR"
+  const detail = item.id === "moon_bow"
+    ? `<path d="M30 22 A13 13 0 1 0 40 40 A10 10 0 1 1 30 22 Z" fill="${r}" opacity=".85"/><circle cx="44" cy="24" r="2.4" fill="${r}"/>`
+    : item.id === "bone_bow"
+      ? `<path d="M34 30 l-7 -3 -2 7 8 1 M30 52 l-8 2 2 7 7 -5 M44 18 l-3 -7 7 -2 1 8" fill="none" stroke="${c}" stroke-width="2.5"/><circle cx="48" cy="46" r="2.2" fill="${r}"/>`
+      : item.id === "hunter_bow"
+        ? `<path d="M39 58 h10 M39 64 h10" stroke="${r}" stroke-width="2"/><circle cx="41" cy="61" r="1.8" fill="${c}"/>`
+        : item.id === "starter_bow"
+          ? `<path d="M36 30 l-5 -7 7 1" fill="none" stroke="${c}" stroke-width="1.5"/>`
+          : item.id === "moon_cloak"
+            ? `<path d="M42 34 C48 18 72 18 78 34 C68 28 52 28 42 34 Z" fill="${c}" opacity=".75"/><circle cx="60" cy="45" r="3" fill="${r}"/>`
+            : item.id === "bone_plate"
+              ? `<path d="M35 40 l-9 -8 3 12 M85 40 l9 -8 -3 12 M46 33 l-3 -9 8 5 M74 33 l3 -9 -8 5" fill="none" stroke="${r}" stroke-width="2.2"/>`
+              : item.id === "leather_vest"
+                ? `<path d="M40 38 L52 52 M80 38 L68 52" stroke="${r}" stroke-width="2" opacity=".8"/><circle cx="60" cy="62" r="3" fill="${r}"/>`
+                : item.id === "starter_vest"
+                  ? `<path d="M43 57 H77" stroke="${r}" stroke-width="1.5" opacity=".7"/>`
+                  : item.id === "acorn_charm"
+                    ? `<path d="M60 40 C48 50 48 62 60 70 C72 62 72 50 60 40 Z" fill="${c}" opacity=".8"/><path d="M54 44 l-8 -6 M66 44 l8 -6" stroke="${r}" stroke-width="2"/>`
+                    : item.id === "firefly_charm"
+                      ? `<path d="M60 56 C42 40 38 54 54 62 C46 74 58 78 60 64 C62 78 74 74 66 62 C82 54 78 40 60 56 Z" fill="${c}" opacity=".55"/><circle cx="60" cy="60" r="5" fill="${r}"/>`
+                      : item.id === "fang_charm"
+                        ? `<path d="M50 44 C48 62 54 76 60 82 C66 76 72 62 70 44 C66 52 54 52 50 44 Z" fill="${r}" opacity=".82"/>`
+                        : item.id === "starter_charm"
+                          ? `<circle cx="60" cy="62" r="11" fill="${c}" opacity=".85"/><path d="M60 46 q6 -8 12 -4" fill="none" stroke="${r}" stroke-width="2"/>`
+                          : "";
+  const sparkles = item.rarity === "legendary"
     ? `<g fill="${r}"><path d="M24 28 l2 5 5 2 -5 2 -2 5 -2 -5 -5 -2 5 -2z"/><path d="M95 24 l1.5 4 4 1.5 -4 1.5 -1.5 4 -1.5 -4 -4 -1.5 4 -1.5z"/><path d="M93 90 l1 3 3 1 -3 1 -1 3 -1 -3 -3 -1 3 -1z"/></g>`
-    : item.rarity === "SR"
+    : item.rarity === "epic"
       ? `<g fill="${r}" opacity=".8"><path d="M25 32 l1.5 4 4 1.5 -4 1.5 -1.5 4 -1.5 -4 -4 -1.5 4 -1.5z"/></g>`
       : "";
   return `<svg viewBox="0 0 120 120" class="gear-svg" role="img" aria-label="${item.name}">
     <rect x="3" y="3" width="114" height="114" rx="10" fill="#081009" stroke="${r}" stroke-opacity=".55"/>
-    <circle cx="60" cy="58" r="44" fill="${c}" opacity="${item.rarity === "SSR" ? ".11" : ".06"}"/>
+    <circle cx="60" cy="58" r="44" fill="${c}" opacity="${item.rarity === "legendary" ? ".11" : ".06"}"/>
     <circle cx="60" cy="58" r="44" fill="none" stroke="${r}" stroke-opacity=".18"/>
     ${sparkles}
     ${art}
+    ${detail}
     <path d="M10 10 h16 M10 10 v16 M110 110 h-16 M110 110 v-16" stroke="${r}" stroke-opacity=".5" stroke-width="1.2"/>
   </svg>`;
 }
@@ -5402,13 +5234,13 @@ function renderGear() {
       const cost = gearUpgradeCost(item, lvl);
       const maxed = lvl >= 5;
       const canUpgrade = owned && !maxed && save.coins >= cost;
-      return `<div class="gear-item ${equipped ? "equipped" : ""} ${owned ? "" : "locked"}">
+      return `<div class="gear-item rar-${item.rarity} ${equipped ? "equipped" : ""} ${owned ? "" : "locked"}">
         <div class="gear-main">
           <div class="gear-art">${gearArtSVG(item)}${owned ? "" : '<span class="gear-lock">未獲得</span>'}</div>
           <div class="gear-info">
             <div class="gear-top">
               <span class="chip set-${item.set}">${GEAR_SETS[item.set].name}</span>
-              <span class="rarity-tag rar-${item.rarity}">${item.rarity}</span>
+              <span class="rarity-tag rar-${item.rarity}">${RARITY_INFO[item.rarity].name}</span>
             </div>
             <h4>${item.name}</h4>
             <div class="level-pips">${[1, 2, 3, 4, 5].map((i) => `<i class="${i <= lvl ? "on" : ""}"></i>`).join("")}</div>
@@ -5479,7 +5311,7 @@ function openGear(from) {
   dom.screenLevel.classList.remove("on");
   dom.screenPause.classList.remove("on");
   dom.screenGear.classList.add("on");
-  document.body.classList.remove("playing", "aim", "touch", "auto", "levelup");
+  document.body.classList.remove("playing", "touch", "levelup");
   dom.mobile.style.display = "none";
   renderGear();
   updateCoinUI();
@@ -5492,7 +5324,7 @@ function closeGear() {
 /* ------------------------ gacha ------------------------ */
 function gachaRarity() {
   const r = Math.random() * 100;
-  return r < 5 ? "SSR" : r < 30 ? "SR" : "R";
+  return r < 5 ? "legendary" : r < 30 ? "epic" : "rare";
 }
 function renderGacha() {
   updateGemUI();
@@ -5504,7 +5336,7 @@ function renderGacha() {
       return `<div class="gacha-item rar-${item.rarity} ${owned ? "owned" : ""}">
         <div class="gacha-item-art">${gearArtSVG(item)}</div>
         <div class="gacha-item-info">
-          <span class="rarity-tag rar-${item.rarity}">${item.rarity}</span>
+          <span class="rarity-tag rar-${item.rarity}">${RARITY_INFO[item.rarity].name}</span>
           <b>${item.name}</b>
           <span class="owned-tag">${owned ? "所持済み" : "未所持"}</span>
         </div>
@@ -5519,7 +5351,7 @@ function showGachaResults(results) {
   if (!dom.gachaResults) return;
   dom.gachaResults.innerHTML = results.map((r) => `<div class="gacha-result rar-${r.item.rarity}">
     <div class="gacha-result-art">${gearArtSVG(r.item)}</div>
-    <span class="rarity-tag rar-${r.item.rarity}">${r.item.rarity}</span>
+    <span class="rarity-tag rar-${r.item.rarity}">${RARITY_INFO[r.item.rarity].name}</span>
     <b>${r.item.name}</b>
     <span class="${r.isNew ? "new" : "dup"}">${r.isNew ? "NEW" : "DUP +" + r.coins + "◈"}</span>
   </div>`).join("");
@@ -5537,9 +5369,9 @@ function pullGacha(count) {
   for (let i = 0; i < count; i++) {
     let rarity = gachaRarity();
     if (count === 10 && i === count - 1 && !srPlus) {
-      rarity = Math.random() < 0.8 ? "SR" : "SSR";
+      rarity = Math.random() < 0.8 ? "epic" : "legendary";
     }
-    if (rarity === "SR" || rarity === "SSR") srPlus = true;
+    if (rarity === "epic" || rarity === "legendary") srPlus = true;
     const pool = GACHA_POOL.filter((g) => g.rarity === rarity);
     const item = pick(pool.length ? pool : GACHA_POOL);
     const isNew = !isGearOwned(item.id);
@@ -5656,19 +5488,15 @@ function pauseGame() {
   endFloatStick();
   state = "paused";
   dom.screenPause.classList.add("on");
-  document.body.classList.remove("aim", "auto");
   hideRadar();
-  input.mouseDown = false;
   input.keys.clear();
   input.moveVec.x = input.moveVec.y = 0;
-  input.aimVec.active = false;
 }
 
 function resumeGame() {
   if (state !== "paused") return;
   state = "playing";
   dom.screenPause.classList.remove("on");
-  if (!useTouchUI) document.body.classList.add("aim");
   if (audio.ctx && audio.ctx.state === "suspended") audio.ctx.resume();
 }
 
@@ -5723,8 +5551,6 @@ function setupInput() {
     if (e.repeat) return;
     if (e.code === "Escape" || e.code === "KeyP") {
       if (state === "playing" || state === "paused") togglePause();
-    } else if (e.code === "KeyE") {
-      tryFocus();
     } else if (e.code === "KeyM") {
       toggleMute();
     } else if (e.code === "Enter") {
@@ -5737,15 +5563,8 @@ function setupInput() {
   });
   addEventListener("blur", () => {
     input.keys.clear();
-    input.mouseDown = false;
     endFloatStick();
     if (state === "playing") pauseGame();
-  });
-  addEventListener("mousemove", (e) => {
-    input.pointerX = e.clientX;
-    input.pointerY = e.clientY;
-    dom.crosshair.style.left = e.clientX + "px";
-    dom.crosshair.style.top = e.clientY + "px";
   });
   const canvas = renderer.domElement;
   canvas.addEventListener("pointerdown", (e) => {
@@ -5757,9 +5576,6 @@ function setupInput() {
       e.preventDefault();
       return;
     }
-    if (useTouchUI) return;
-    if (e.button === 0) input.mouseDown = true;
-    if (state === "playing") e.preventDefault();
   });
   canvas.addEventListener("pointermove", (e) => {
     if (e.pointerId !== floatPointer) return;
@@ -5773,14 +5589,6 @@ function setupInput() {
   canvas.addEventListener("pointerup", endFloatPointer);
   canvas.addEventListener("pointercancel", endFloatPointer);
   canvas.addEventListener("lostpointercapture", endFloatPointer);
-  canvas.addEventListener("mousedown", (e) => {
-    if (useTouchUI) return;
-    if (e.button === 0) input.mouseDown = true;
-    if (state === "playing") e.preventDefault();
-  });
-  addEventListener("mouseup", (e) => {
-    if (e.button === 0) input.mouseDown = false;
-  });
   addEventListener("contextmenu", (e) => e.preventDefault());
   addEventListener("visibilitychange", () => {
     if (document.hidden) {
